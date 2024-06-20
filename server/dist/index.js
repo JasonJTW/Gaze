@@ -5,10 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const app = (0, express_1.default)();
-const PORT = 3000;
+const port = process.env.PORT || 3000;
 app.get("/", (req, res) => {
-    res.send("Welcome!");
+    console.log(`Hello! `);
+    res.send("Hello there!");
 });
-app.listen(PORT, () => {
-    console.log(`Running on port ${PORT}`);
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
 });
