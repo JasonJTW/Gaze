@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "sync": "aws s3 sync ./dist 's3://gaze-react-app/'",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "invalidate": "aws cloudfront create-invalidation --distribution-id E3S5ATPVH201GI --paths '/*'",
     "preview": "vite preview"
   },
   "dependencies": {

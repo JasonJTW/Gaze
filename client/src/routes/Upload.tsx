@@ -37,11 +37,16 @@ function App() {
       formData.append("image", file);
     });
     console.log(formData);
+    console.log(`Request API: ${hostName}/api/upload`);
 
     try {
+      //* fetch uploadPhoto API from server
       const response = await fetch(`${hostName}/api/upload`, {
         method: "POST",
         body: formData,
+        headers: {
+          Accept: "application/json",
+        },
       });
       /// Check response status code
       if (!response.ok) {
@@ -63,6 +68,8 @@ function App() {
     <>
       <div>
         <h1>Upload</h1>
+        <h2>Select and upload your works!</h2>
+        <h3>Another update</h3>
         <form
           action={`${hostName}/api/upload`}
           method="POST"
