@@ -12,17 +12,21 @@ const limiter = rateLimit({
   limit: 50, // limit each IP to 100 requests per windowMs
   message: "Too many requests, please try again later 🥲.",
 });
-
+app.set("trust proxy", true);
 app.use(limiter);
 app.get("/", (req: Request, res: Response) => {
   console.log(`Hello! `);
   res.send("Hello there!");
 });
+app.use(express.json()); // 確保 Express 能夠解析 JSON 請求體
+app.use(express.urlencoded({ extended: true })); // 確保 Express 能夠解析 URL 編碼的請求體
 
 const apiRoutes = require("./routes/api");
-app.use(
+ app.use(
   cors({
-    origin: clientHostName, // Allow requests from this ip
+   origin: clientHostName, // Allow requests from this ip
+    methods: ["GET", "POST", "PUT", "DELETE"], // 允許的 HTTP 方法
+    allowedHeaders: ["Content-Type", "Authorization"], // 允許的 HTTP 標頭
   })
 );
 app.use("/api", apiRoutes);

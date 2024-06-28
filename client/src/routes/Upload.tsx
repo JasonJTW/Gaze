@@ -42,6 +42,9 @@ function App() {
       const response = await fetch(`${hostName}/api/upload`, {
         method: "POST",
         body: formData,
+	headers: {
+        'Accept': 'application/json',
+      },
       });
       /// Check response status code
       if (!response.ok) {
