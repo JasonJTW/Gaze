@@ -95,6 +95,7 @@ function App() {
         body: formData,
         headers: {
           Accept: "application/json",
+          "Accept-Charset": "UTF-8",
         },
       });
       /// Check response status code

@@ -20,7 +20,7 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello there!");
 });
 
-const apiRoutes = require("./routes/api");
+import apiRoutes from "./routes/api";
 app.use(
   cors({
     origin: clientHostName, // Allow requests from this ip

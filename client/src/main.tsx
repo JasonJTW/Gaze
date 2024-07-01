@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import Upload from "./routes/Upload.tsx";
+import Management from "./routes/Management.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import "@fontsource/roboto/300.css";
@@ -12,6 +13,10 @@ const router = createBrowserRouter([
   {
     path: "/upload",
     element: <Upload />,
+  },
+  {
+    path: "/management",
+    element: <Management />,
   },
 ]);
 
