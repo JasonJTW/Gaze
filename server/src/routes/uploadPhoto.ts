@@ -18,7 +18,7 @@ const bucketRegion = process.env.BUCKET_REGION;
 const accessKey = process.env.ACCESS_KEY!;
 const secretAccessKey = process.env.SECRET_ACCESS_KEY!;
 const s3Url = process.env.S3URL;
-
+const cloudfrontUrl = process.env.CLOUDFRONT_URL;
 /// DB config
 const db = mysql
   .createPool({
@@ -35,14 +35,12 @@ const s3 = new S3Client({
     secretAccessKey: secretAccessKey,
   },
   region: bucketRegion,
+  maxAttempts: 3,
 });
 
-function randomImageName(originalName: string, bytes: number = 32) {
-  return (
-    encodeFileName(originalName) +
-    "_" +
-    crypto.randomBytes(bytes).toString("hex")
-  );
+//! If we encode the space inside filename to "%20" before uploading the image to S3, S3 will encode it again to "%2520"
+function randomImageCode(bytes: number = 32) {
+  return crypto.randomBytes(bytes).toString("hex");
 }
 
 function encodeFileName(originalName: string) {
@@ -73,15 +71,21 @@ router.post(
         /// for each image
         for (const image of images) {
           /// extract photo metadata with jpeg-exif
+          image.originalname = Buffer.from(
+            image.originalname,
+            "latin1"
+          ).toString("utf8");
           const metadata = exif.fromBuffer(image.buffer);
           const photographer = metadata.Artist || metadata.Copyright || null;
           console.log(image);
           console.log("metadata:", metadata);
           /// random file name
-          let fileName = randomImageName(image.originalname);
+          const randomCode = randomImageCode();
+          const fileName =
+            encodeFileName(image.originalname) + "_" + randomCode;
           const params = {
             Bucket: bucketName,
-            Key: fileName,
+            Key: image.originalname + "_" + randomCode,
             Body: image.buffer,
             ContentType: image.mimetype,
           };
@@ -91,7 +95,7 @@ router.post(
           await s3.send(command);
 
           //* Send image info to DB
-          const url: string = s3Url + fileName;
+          const url: string = cloudfrontUrl + fileName;
           console.log(`url: ${url}`);
           const query = `insert into photos(url, photographer, category, original_name, exif) values(?, ?, ?, ?, ?)`;
           // TODO: Handle photographer and category info
