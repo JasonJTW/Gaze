@@ -3,11 +3,12 @@ const app = express();
 const router = express.Router();
 // const uploadAPI = require("./uploadPhoto");
 import uploadAPI from "./uploadPhoto";
-const getPhotoAPI = require("./getPhoto");
+import getPhotoAPI from "./getPhoto";
 router.get("/", (req: Request, res: Response) => {
   res.send("this is the api route");
 });
 
 router.use("/upload", uploadAPI);
+router.use("/photo", getPhotoAPI);
 
 export default router;
