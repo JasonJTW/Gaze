@@ -115,6 +115,13 @@ function App() {
 
   const theme = createTheme({
     components: {
+      MuiContainer: {
+        styleOverrides: {
+          root: {
+            backgroundColor: "#010c1e",
+          },
+        },
+      },
       MuiButton: {
         defaultProps: {
           disableRipple: true,
@@ -137,7 +144,6 @@ function App() {
       <ThemeProvider theme={theme}>
         <Container
           sx={{
-            bgcolor: "#010c1e",
             minHeight: "100%",
             minWidth: "100%",
             margin: 0,
