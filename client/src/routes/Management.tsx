@@ -80,6 +80,7 @@ export default function Management() {
             minWidth: "100%",
             margin: 0,
             display: "flex",
+            flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
           }}
@@ -91,6 +92,7 @@ export default function Management() {
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "flex-end",
+              minHeight: "400px",
             }}
           >
             <Typography variant="h1" sx={{ color: "#c6cdd7" }}>
@@ -100,12 +102,20 @@ export default function Management() {
               Manage your gallery.
             </Typography>
           </Container>
-          <ImageList variant="masonry" cols={3} gap={10}>
+          <ImageList
+            variant="masonry"
+            cols={3}
+            gap={10}
+            sx={{
+              margin: "60px",
+            }}
+          >
             {data.map((item, index) => (
               <ImageListItem key={index}>
                 <img
                   src={item.url}
                   loading="lazy"
+                  alt={item.original_name}
                   style={{
                     borderRadius: "5px",
                   }}
