@@ -10,7 +10,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 import MenuIcon from "@mui/icons-material/Menu";
 
-const pages = ["Upload", "Management", "Blog"];
+const pages = ["Upload", "Management", "Content"];
 function Nav() {
   const theme = createTheme({
     components: {
@@ -45,6 +45,7 @@ function Nav() {
                 to={`/${page}`}
                 color="primary"
                 underline="hover"
+                key={page}
               >
                 {page}
               </Link>

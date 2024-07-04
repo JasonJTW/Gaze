@@ -5,7 +5,9 @@ import {
   Typography,
   ImageList,
   ImageListItem,
+  Button,
 } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 const hostName = import.meta.env.VITE_ServerHostName;
 export default function Management() {
@@ -48,7 +50,7 @@ export default function Management() {
   const getData = async () => {
     try {
       //* fetch getPhoto API from server
-      const response = await fetch(`${hostName}/api/photo`, {
+      const response = await fetch(`${hostName}/api/photo/all`, {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -108,19 +110,71 @@ export default function Management() {
             gap={10}
             sx={{
               margin: "60px",
+              overflow: "visible",
             }}
           >
             {data.map((item, index) => (
-              <ImageListItem key={index}>
-                <img
-                  src={item.url}
-                  loading="lazy"
-                  alt={item.original_name}
-                  style={{
-                    borderRadius: "5px",
+              // <Link
+              //   component={RouterLink}
+              //   to={`/Content?id=${item.id}`}
+              //   underline="none"
+              //   sx={{ textDecoration: "none" }}
+              // >
+              <ImageListItem
+                key={index}
+                // component={RouterLink}
+                // to={`/Content?id=${item.id}`}
+                // onClick={(e: React.MouseEvent) => {
+                // e.preventDefault();
+                // }}
+                sx={{
+                  position: "relative",
+                  "&:hover img": {
+                    opacity: 0.6,
+                    willChange: "opacity",
+                  },
+                  "&:hover button": {
+                    opacity: 1,
+                    right: 5,
+                    top: 5,
+                    willChange: "opacity, right, top",
+                  },
+                }}
+              >
+                <RouterLink to={`/Content?id=${item.id}`}>
+                  <img
+                    src={item.url}
+                    loading="lazy"
+                    alt={item.original_name}
+                    style={{
+                      borderRadius: "5px",
+                      transition: "opacity 0.2s ease-in-out",
+                      willChange: "opacity",
+                      width: "100%",
+                      height: "auto",
+                      display: "block",
+                    }}
+                  />
+                </RouterLink>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  sx={{
+                    position: "absolute",
+                    right: 0,
+                    top: 0,
+                    opacity: 0,
+                    transition: "0.2s ease-in-out",
                   }}
-                />
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    alert(`Delete ${item.original_name}?`);
+                  }}
+                >
+                  x
+                </Button>
               </ImageListItem>
+              // </Link>
             ))}
           </ImageList>
         </Container>
