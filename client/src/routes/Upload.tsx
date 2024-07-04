@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import ImageIcon from "@mui/icons-material/Image";
-function App() {
+
+function Upload() {
   /// Maximum number of uploads
   const maxAllowedFiles = import.meta.env.VITE_maxAllowedFiles;
   const hostName = import.meta.env.VITE_ServerHostName;
@@ -257,4 +258,4 @@ function App() {
   );
 }
 
-export default App;
+export default Upload;
