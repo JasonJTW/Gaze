@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import mysql, { RowDataPacket } from "mysql2";
+import mysql from "mysql2";
 const router = express.Router();
 const db = mysql
   .createPool({
@@ -7,6 +7,11 @@ const db = mysql
     user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
+    waitForConnections: true,
+    connectionLimit: 10, // Increase the connection pool size if necessary
+    idleTimeout: 10000, // 30 seconds acquisition timeout
+    connectTimeout: 10000, // 10 seconds connection timeout
+    keepAliveInitialDelay: 30000,
   })
   .promise();
 

@@ -39,7 +39,7 @@ export default function Management() {
         styleOverrides: {
           root: {
             // padding: "4px",
-            borderRadius: "5px",
+            borderRadius: "10px",
             minWidth: "30px",
           },
         },
@@ -98,7 +98,7 @@ export default function Management() {
             }}
           >
             <Typography variant="h1" sx={{ color: "#c6cdd7" }}>
-              Management
+              Management "
             </Typography>
             <Typography variant="overline" sx={{ color: "#d6c9d0" }}>
               Manage your gallery.
@@ -111,27 +111,26 @@ export default function Management() {
             sx={{
               margin: "60px",
               overflow: "visible",
+              maxWidth: "1200px",
             }}
           >
             {data.map((item, index) => (
-              // <Link
-              //   component={RouterLink}
-              //   to={`/Content?id=${item.id}`}
-              //   underline="none"
-              //   sx={{ textDecoration: "none" }}
-              // >
               <ImageListItem
                 key={index}
-                // component={RouterLink}
-                // to={`/Content?id=${item.id}`}
-                // onClick={(e: React.MouseEvent) => {
-                // e.preventDefault();
-                // }}
                 sx={{
                   position: "relative",
+                  transition: "0.2s ease-in-out",
+                  willChange: "border",
+                  border: "1px solid transparent",
+                  borderRadius: "20px",
+                  "&:hover": {
+                    border: "1px solid #ccc",
+                    borderRadius: "20px",
+                  },
                   "&:hover img": {
-                    opacity: 0.6,
-                    willChange: "opacity",
+                    opacity: 0.5,
+                    filter: "blur(5px)",
+                    willChange: "opacity, filter",
                   },
                   "&:hover button": {
                     opacity: 1,
@@ -147,9 +146,9 @@ export default function Management() {
                     loading="lazy"
                     alt={item.original_name}
                     style={{
-                      borderRadius: "5px",
-                      transition: "opacity 0.2s ease-in-out",
-                      willChange: "opacity",
+                      borderRadius: "20px",
+                      transition: "0.2s ease-in-out",
+                      willChange: "opacity, filter",
                       width: "100%",
                       height: "auto",
                       display: "block",
@@ -174,7 +173,6 @@ export default function Management() {
                   x
                 </Button>
               </ImageListItem>
-              // </Link>
             ))}
           </ImageList>
         </Container>

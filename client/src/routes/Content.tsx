@@ -15,8 +15,9 @@ interface DataItem {
   photographer: string | null;
   category: string | null;
   original_name: string;
-  exif: object | null;
+  exif: Record<string, unknown> | null;
 }
+
 function Content() {
   const [data, setData] = useState<DataItem[]>([]);
   const [id, setId] = useState<string | null>(null);
@@ -46,26 +47,18 @@ function Content() {
     }
   };
 
+  //* Get image's id from url
   useEffect(() => {
     const param = new URLSearchParams(window.location.search);
     const queryId = param.get("id");
     setId(queryId);
   }, []);
 
+  //* Fetch data from api
   useEffect(() => {
     getData(id);
   }, [id]);
 
-  useEffect(() => {
-    /// exif object keys
-    if (data.length === 0) return;
-    const exif = data[0].exif;
-    let exifKeys: string[] = [];
-    if (exif) {
-      exifKeys = Object.keys(exif);
-      console.log(exifKeys);
-    }
-  }, [data]);
   const theme = createTheme({
     components: {
       MuiContainer: {
@@ -92,6 +85,31 @@ function Content() {
     },
   });
 
+  //* Exclude these from exif data:
+  const excludedKeys = [
+    "SubExif",
+    "XResolution",
+    "YResolution",
+    "ResolutionUnit",
+    "ExifIFDPointer",
+  ];
+
+  // TODO:
+  // const includeSubExif = [
+  //   /// Aperture
+  //   "FNumber",
+  //   "LensMake",
+  //   "LensModel",
+  //   /// ISO
+  //   "PhotographicSensitivity",
+  //   /// FocalLength
+  //   "FocalLengthIn35mmFilm",
+  //   "PixelXDimension",
+  //   "PixelYDimension",
+  //   /// Shutter
+  //   /// XY Resolution from sony camera
+  // ];
+
   return (
     <ThemeProvider theme={theme}>
       <Container
@@ -108,12 +126,12 @@ function Content() {
         <Grid container>
           {data.length > 0 && (
             <>
-              <Grid item xs={6}>
+              <Grid item xs={8}>
                 <Container
                   sx={{
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "end",
+                    alignItems: "center",
                     maxHeight: "100%",
                   }}
                 >
@@ -128,25 +146,76 @@ function Content() {
                       height: "auto",
                     }}
                   />
-                  <div style={{ width: "auto" }}>
-                    <Typography variant="overline" color={"#c6cdd7"}>
-                      Filename:
-                    </Typography>
+                  <div style={{ width: "auto", marginTop: "10px" }}>
                     <Typography
                       variant="overline"
                       color={"#c6cdd7"}
-                      marginLeft={4}
+                      marginLeft={2}
+                      marginRight={8}
                     >
-                      {data[0].original_name}
+                      " {data[0].original_name} "
+                    </Typography>
+                    <Typography variant="overline" color={"#c6cdd7"}>
+                      By_
+                    </Typography>
+                    <Typography
+                      variant="overline"
+                      color={"#d6c9d0"}
+                      marginLeft={2}
+                    >
+                      {data[0].photographer || "undefined"}
                     </Typography>
                   </div>
                 </Container>
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={4}>
                 <Typography variant="h2" color={"#c6cdd7"}>
-                  exif
+                  MetaData
                 </Typography>
                 <hr />
+                {data[0].exif &&
+                  Object.entries(data[0].exif).map(([key, value]) =>
+                    !excludedKeys.includes(key) ? (
+                      <Container
+                        key={key}
+                        sx={{
+                          width: "auto",
+                          wordBreak: "break-word",
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        <Typography
+                          variant="body1"
+                          color={"white"}
+                          gutterBottom
+                        >
+                          {key}:
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color={"#d6c9d0"}
+                          gutterBottom
+                        >
+                          - {JSON.stringify(value)}
+                        </Typography>
+                      </Container>
+                    ) : null
+                  )}
+                /// Sub Exif
+                {data[0].exif && (
+                  <Container
+                    sx={{
+                      width: "auto",
+                      wordBreak: "break-word",
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    <Typography variant="h2" color={"#c6cdd7"}>
+                      SubExif
+                    </Typography>
+                    <hr />
+                  </Container>
+                )}
               </Grid>
             </>
           )}
