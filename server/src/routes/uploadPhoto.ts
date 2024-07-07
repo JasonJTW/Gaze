@@ -8,6 +8,7 @@ import { openAsBlob } from "fs";
 import mysql, { RowDataPacket } from "mysql2";
 import exif from "jpeg-exif";
 import util from "util";
+import sizeOf from "buffer-image-size";
 const maxAllowedFiles = Number(process.env.maxAllowedFiles);
 
 const router = express.Router();
@@ -68,7 +69,7 @@ router.post(
       console.log(`bucketRegion: ${bucketRegion}`);
 
       try {
-        /// for each image
+        //* for each image
         for (const image of images) {
           /// extract photo metadata with jpeg-exif
           image.originalname = Buffer.from(
@@ -76,6 +77,16 @@ router.post(
             "latin1"
           ).toString("utf8");
           const metadata = exif.fromBuffer(image.buffer);
+
+          //! Fix the resolution data for image edited in LR, Lightroom Classic does not write the Pixel*Dimension tags.
+          //! https://www.reddit.com/r/Lightroom/comments/yheq9r/image_dimensions_not_included_in_exif_data_for/
+
+          const dimensionWidth = sizeOf(image.buffer).width;
+          const dimensionHeight = sizeOf(image.buffer).height;
+          console.log(
+            `dimensionW: ${dimensionWidth}, dimensionH: ${dimensionHeight}`
+          );
+
           const photographer = metadata.Artist || metadata.Copyright || null;
           console.log(image);
           console.log("metadata:", metadata);
