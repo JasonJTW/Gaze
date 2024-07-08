@@ -66,6 +66,11 @@ function flattenObj(object: Record<string, any>) {
   return object;
 }
 
+function handleShutter(shutter: number) {
+  const shutterSpeed = `1/${Math.round(1 / shutter)}`;
+  return shutterSpeed;
+}
+
 router.get("/", (req: Request, res: Response) => {
   console.log(maxAllowedFiles);
   res.send("this is the upload api");
@@ -95,8 +100,18 @@ router.post(
             "latin1"
           ).toString("utf8");
           let metadata = exif.fromBuffer(image.buffer);
-          /// Flatten metadata
-          metadata = flattenObj(metadata);
+
+          if (metadata) {
+            /// Flatten metadata
+            metadata = flattenObj(metadata);
+          }
+
+          if (metadata.SubExif?.ExposureTime) {
+            /// Handle shutter speed
+            metadata.SubExif.ExposureTime = handleShutter(
+              metadata.SubExif.ExposureTime
+            );
+          }
 
           //! Fix the resolution data for image edited in LR, Lightroom Classic does not write the Pixel*Dimension tags.
           //! https://www.reddit.com/r/Lightroom/comments/yheq9r/image_dimensions_not_included_in_exif_data_for/
