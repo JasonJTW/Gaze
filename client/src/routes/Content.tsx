@@ -88,10 +88,16 @@ function Content() {
   //* Exclude these from exif data:
   const excludedKeys = [
     "SubExif",
-    "XResolution",
-    "YResolution",
+    // "XResolution",
+    // "YResolution",
     "ResolutionUnit",
-    "ExifIFDPointer",
+    "GPSInfoIFDPointer",
+    "GPSInfo",
+    // "ExifIFDPointer",
+    // "XDimension",
+    // "YDimension",
+    // "Orientation",
+    // "YCbCrPositioning",
   ];
 
   // TODO:
@@ -104,10 +110,10 @@ function Content() {
   //   "PhotographicSensitivity",
   //   /// FocalLength
   //   "FocalLengthIn35mmFilm",
-  //   "PixelXDimension",
-  //   "PixelYDimension",
+  //   /// XY Resolution
+  //   "XDimension"
+  //   "YDimension"
   //   /// Shutter
-  //   /// XY Resolution from sony camera
   // ];
 
   return (
@@ -202,20 +208,83 @@ function Content() {
                     ) : null
                   )}
                 /// Sub Exif
-                {data[0].exif && (
-                  <Container
-                    sx={{
-                      width: "auto",
-                      wordBreak: "break-word",
-                      whiteSpace: "pre-wrap",
-                    }}
-                  >
-                    <Typography variant="h2" color={"#c6cdd7"}>
-                      SubExif
-                    </Typography>
-                    <hr />
-                  </Container>
-                )}
+                {data[0].exif &&
+                  (data[0].exif as { SubExif: Record<string, unknown> })
+                    .SubExif && (
+                    <>
+                      <Typography variant="h5" color={"#c6cdd7"}>
+                        SubExif
+                      </Typography>
+                      <hr />
+                      {Object.entries(
+                        (data[0].exif as { SubExif: Record<string, unknown> })
+                          .SubExif
+                      ).map(([key, value]) => (
+                        <Container
+                          key={key}
+                          sx={{
+                            width: "auto",
+                            wordBreak: "break-word",
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            color={"white"}
+                            gutterBottom
+                          >
+                            {key}:
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color={"#d6c9d0"}
+                            gutterBottom
+                          >
+                            - {JSON.stringify(value)}
+                          </Typography>
+                        </Container>
+                      ))}
+                    </>
+                  )}
+                /// GPS Info
+                {data[0].exif &&
+                  (data[0].exif as { GPSInfo: Record<string, unknown> })
+                    .GPSInfo && (
+                    <>
+                      <Typography variant="h5" color={"#c6cdd7"}>
+                        GPSInfo
+                      </Typography>
+                      <hr />
+                      {Object.entries(
+                        (data[0].exif as { GPSInfo: Record<string, unknown> })
+                          .GPSInfo
+                      ).map(([key, value]) => (
+                        <Container
+                          key={key}
+                          sx={{
+                            width: "auto",
+                            wordBreak: "break-word",
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            color={"white"}
+                            gutterBottom
+                          >
+                            {key}:
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color={"#d6c9d0"}
+                            gutterBottom
+                          >
+                            - {JSON.stringify(value)}
+                          </Typography>
+                        </Container>
+                      ))}
+                    </>
+                  )}
               </Grid>
             </>
           )}

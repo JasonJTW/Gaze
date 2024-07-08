@@ -48,6 +48,29 @@ function encodeFileName(originalName: string) {
   return encodeURIComponent(originalName);
 }
 
+function flattenObj(object: Record<string, any>) {
+  if (typeof object !== "object" || object === null) {
+    return object;
+  }
+
+  for (const key in object) {
+    if (!object.hasOwnProperty(key)) continue;
+
+    if (typeof object[key] == "object" && object[key] != null) {
+      flattenObj(object[key]);
+    }
+    if (Array.isArray(object[key]) && object[key].length === 1) {
+      object[key] = object[key][0];
+    }
+  }
+  return object;
+}
+
+function handleShutter(shutter: number) {
+  const shutterSpeed = `1/${Math.round(1 / shutter)}`;
+  return shutterSpeed;
+}
+
 router.get("/", (req: Request, res: Response) => {
   console.log(maxAllowedFiles);
   res.send("this is the upload api");
@@ -76,16 +99,32 @@ router.post(
             image.originalname,
             "latin1"
           ).toString("utf8");
-          const metadata = exif.fromBuffer(image.buffer);
+          let metadata = exif.fromBuffer(image.buffer);
+
+          if (metadata) {
+            /// Flatten metadata
+            metadata = flattenObj(metadata);
+          }
+
+          if (metadata.SubExif?.ExposureTime) {
+            /// Handle shutter speed
+            metadata.SubExif.ExposureTime = handleShutter(
+              metadata.SubExif.ExposureTime
+            );
+          }
 
           //! Fix the resolution data for image edited in LR, Lightroom Classic does not write the Pixel*Dimension tags.
           //! https://www.reddit.com/r/Lightroom/comments/yheq9r/image_dimensions_not_included_in_exif_data_for/
+
+          /// Use <buffer-image-size> for image dimension data instead
 
           const dimensionWidth = sizeOf(image.buffer).width;
           const dimensionHeight = sizeOf(image.buffer).height;
           console.log(
             `dimensionW: ${dimensionWidth}, dimensionH: ${dimensionHeight}`
           );
+          metadata.XDimension = dimensionWidth;
+          metadata.YDimension = dimensionHeight;
 
           const photographer = metadata.Artist || metadata.Copyright || null;
           console.log(image);
@@ -105,11 +144,11 @@ router.post(
           //* send to s3
           await s3.send(command);
 
-          //* Send image info to DB
+          //* Send image info, EXIF to DB
           const url: string = cloudfrontUrl + fileName;
           console.log(`url: ${url}`);
           const query = `insert into photos(url, photographer, category, original_name, exif) values(?, ?, ?, ?, ?)`;
-          // TODO: Handle photographer and category info
+          // TODO: Handle EXIF, photographer and category info
           await db.query(query, [
             url,
             photographer,
@@ -119,14 +158,14 @@ router.post(
           ]);
         }
 
-        const [[exifData]] = await db.query<RowDataPacket[]>(
-          "select exif from photos where id = ?",
-          [4]
-        );
-        console.log(
-          "exifData:",
-          util.inspect(exifData, { showHidden: false, depth: null })
-        );
+        // const [[exifData]] = await db.query<RowDataPacket[]>(
+        //   "select exif from photos where id = ?",
+        //   [4]
+        // );
+        // console.log(
+        //   "exifData:",
+        //   util.inspect(exifData, { showHidden: false, depth: null })
+        // );
         /// Success response message
         res.status(200).json({ message: "Upload success!" });
       } catch (err) {
