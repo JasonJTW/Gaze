@@ -27,6 +27,11 @@ const db = mysql
     user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
+    waitForConnections: true,
+    connectionLimit: 10, // Increase the connection pool size if necessary
+    idleTimeout: 10000, // 30 seconds acquisition timeout
+    connectTimeout: 10000, // 10 seconds connection timeout
+    keepAliveInitialDelay: 30000,
   })
   .promise();
 
@@ -104,9 +109,12 @@ router.post(
           if (metadata) {
             /// Flatten metadata
             metadata = flattenObj(metadata);
+          } else {
+            metadata = {};
           }
+          console.log("metadata:", metadata);
 
-          if (metadata.SubExif?.ExposureTime) {
+          if (metadata && metadata.SubExif && metadata.SubExif.ExposureTime) {
             /// Handle shutter speed
             metadata.SubExif.ExposureTime = handleShutter(
               metadata.SubExif.ExposureTime
@@ -170,6 +178,7 @@ router.post(
         res.status(200).json({ message: "Upload success!" });
       } catch (err) {
         console.log(`Error uploading image: ${err}`);
+
         /// Failed response message
         res.status(500).json({ message: `${err}` });
       }
