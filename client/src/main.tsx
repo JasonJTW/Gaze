@@ -12,6 +12,7 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import Content from "./routes/Content.tsx";
+import SignIn from "./routes/Signin.tsx";
 const theme = createTheme({
   palette: {
     background: {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
       {
         path: "/content",
         element: <Content />,
+      },
+      {
+        path: "/signin",
+        element: <SignIn />,
       },
     ],
   },
