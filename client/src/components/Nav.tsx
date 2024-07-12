@@ -12,7 +12,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 import MenuIcon from "@mui/icons-material/Menu";
 
-const pages = ["Upload", "Management", "Content"];
+const pages = ["Upload", "Management", "Content", "Category"];
 
 interface Props {
   /**
@@ -53,7 +53,7 @@ function Nav() {
         styleOverrides: {
           root: {
             background:
-              "linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%)",
+              "linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 100%)",
             backdropFilter: "blur(10px)",
             boxShadow: "none",
             // minHeight: "100px",

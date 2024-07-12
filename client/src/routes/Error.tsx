@@ -3,10 +3,16 @@ import {
   createTheme,
   Container,
   Typography,
+  CssBaseline,
 } from "@mui/material";
 import Nav from "../components/Nav";
 function Error() {
   const theme = createTheme({
+    palette: {
+      background: {
+        default: "#010c1e", // Default background color
+      },
+    },
     components: {
       MuiContainer: {
         styleOverrides: {
@@ -19,6 +25,7 @@ function Error() {
   });
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Nav />
       <Container
         sx={{

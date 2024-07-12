@@ -136,3 +136,30 @@ body,
 body {
   overscroll-behavior: none;
 }
+
+/* Scroll bar
+/* WebKit浏览器 */
+/* html::-webkit-scrollbar {
+  width: 2vw;
+}
+
+html::-webkit-scrollbar-track {
+  background: #030c1d;
+  margin-block: 0.5em;
+} */
+
+/* html::-webkit-scrollbar-thumb {
+  background-color: #d6c9d0;
+  border-radius: 15px;
+  border: 6px solid #030c1d;
+} */
+
+/* ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} */
+
+/* Firefox浏览器 */
+/* body {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #030c1d;
+} */

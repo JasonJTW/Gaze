@@ -5,8 +5,16 @@ import {
   Typography,
   ImageList,
   ImageListItem,
+  // ListSubheader,
   Button,
 } from "@mui/material";
+import React from "react";
+import {
+  LazyLoadImage,
+  trackWindowScroll,
+  ScrollPosition,
+} from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
 import { Link as RouterLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 const hostName = import.meta.env.VITE_ServerHostName;
@@ -19,6 +27,11 @@ export default function Management() {
     original_name: string;
     exif: object | null;
   }
+  interface ImageItemProps {
+    item: DataItem;
+    scrollPosition: ScrollPosition; // 或者你可以使用更具体的类型
+  }
+  //TODO Fix scrollbar lag
 
   const [data, setData] = useState<DataItem[]>([]);
   const theme = createTheme({
@@ -38,7 +51,6 @@ export default function Management() {
         },
         styleOverrides: {
           root: {
-            // padding: "4px",
             borderRadius: "10px",
             minWidth: "30px",
           },
@@ -73,6 +85,81 @@ export default function Management() {
   useEffect(() => {
     getData();
   }, []);
+
+  //* Custom ImageList Item
+  const ImageItem: React.FC<ImageItemProps> = ({ item, scrollPosition }) => {
+    return (
+      <ImageListItem
+        key={item.id}
+        sx={{
+          position: "relative",
+          /// border transition speed
+          // transition: "0.1s ease-in-out",
+          border: "1px solid transparent",
+          borderRadius: "20px",
+          overflow: "hidden",
+          "&:hover": {
+            border: "1px solid #ccc",
+          },
+          "&:hover img": {
+            opacity: "0.5 !important",
+            filter: "blur(5px)",
+          },
+          "&:hover button": {
+            opacity: 1,
+            right: 5,
+            top: 5,
+          },
+        }}
+      >
+        <RouterLink to={`/Content?id=${item.id}`}>
+          <LazyLoadImage
+            src={item.url}
+            height="100%"
+            width="100%"
+            effect="blur"
+            placeholderSrc={item.url}
+            scrollPosition={scrollPosition}
+            style={{
+              borderRadius: "20px",
+              willChange: "opacity, filter",
+              width: "100%",
+              height: "auto",
+              display: "block",
+              /// opacity & blur transition speed
+              WebkitTransition: "0.3s ease-in-out",
+              WebkitTransitionProperty: "opacity filter",
+            }}
+            wrapperProps={{
+              style: {
+                backgroundPosition: "center",
+              },
+            }}
+          />
+        </RouterLink>
+        <Button
+          color="primary"
+          variant="contained"
+          sx={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            opacity: 0,
+            transition: "0.2s ease-in-out",
+          }}
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            alert(`Delete ${item.original_name}?`);
+          }}
+        >
+          x
+        </Button>
+      </ImageListItem>
+    );
+  };
+  // Wrap the ImageItem component with trackWindowScroll
+  const ScrollableImageItem = React.memo(trackWindowScroll(ImageItem));
+
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -114,65 +201,27 @@ export default function Management() {
               maxWidth: "1200px",
             }}
           >
-            {data.map((item, index) => (
-              <ImageListItem
-                key={index}
+            {/* FIXME: ListSubheader's width full width   */}
+            {/* <ImageListItem
+              key="Subheader"
+              cols={3}
+              sx={{
+                width: "100%",
+              }}
+            >
+              <ListSubheader
+                component="div"
+                color="primary"
                 sx={{
-                  position: "relative",
-                  transition: "0.2s ease-in-out",
-                  willChange: "border",
-                  border: "1px solid transparent",
-                  borderRadius: "20px",
-                  "&:hover": {
-                    border: "1px solid #ccc",
-                    borderRadius: "20px",
-                  },
-                  "&:hover img": {
-                    opacity: 0.5,
-                    filter: "blur(5px)",
-                    willChange: "opacity, filter",
-                  },
-                  "&:hover button": {
-                    opacity: 1,
-                    right: 5,
-                    top: 5,
-                    willChange: "opacity, right, top",
-                  },
+                  backgroundColor: "#010c1e",
                 }}
               >
-                <RouterLink to={`/Content?id=${item.id}`}>
-                  <img
-                    src={item.url}
-                    loading="lazy"
-                    alt={item.original_name}
-                    style={{
-                      borderRadius: "20px",
-                      transition: "0.2s ease-in-out",
-                      willChange: "opacity, filter",
-                      width: "100%",
-                      height: "auto",
-                      display: "block",
-                    }}
-                  />
-                </RouterLink>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  sx={{
-                    position: "absolute",
-                    right: 0,
-                    top: 0,
-                    opacity: 0,
-                    transition: "0.2s ease-in-out",
-                  }}
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    alert(`Delete ${item.original_name}?`);
-                  }}
-                >
-                  x
-                </Button>
-              </ImageListItem>
+                Portraits
+              </ListSubheader>
+            </ImageListItem> */}
+
+            {data.map((item, index) => (
+              <ScrollableImageItem key={index} item={item} />
             ))}
           </ImageList>
         </Container>
