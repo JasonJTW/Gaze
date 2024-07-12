@@ -31,6 +31,7 @@ export default function Management() {
     item: DataItem;
     scrollPosition: ScrollPosition; // 或者你可以使用更具体的类型
   }
+  //TODO Fix scrollbar lag
 
   const [data, setData] = useState<DataItem[]>([]);
   const theme = createTheme({
@@ -92,43 +93,47 @@ export default function Management() {
         key={item.id}
         sx={{
           position: "relative",
-          transition: "0.2s ease-in-out",
-          willChange: "border",
-          border: "1px solid #ccc",
-          // borderRadius: "20px",
-          // overflow: "hidden",
+          /// border transition speed
+          // transition: "0.1s ease-in-out",
+          border: "1px solid transparent",
+          borderRadius: "20px",
+          overflow: "hidden",
           "&:hover": {
-            // border: "1px solid #ccc",
+            border: "1px solid #ccc",
           },
           "&:hover img": {
-            // opacity: 0.5,
-            // filter: "blur(5px)",
-            // willChange: "filter",
+            opacity: "0.5 !important",
+            filter: "blur(5px)",
           },
           "&:hover button": {
             opacity: 1,
             right: 5,
             top: 5,
-            willChange: "opacity, right, top",
           },
         }}
       >
         <RouterLink to={`/Content?id=${item.id}`}>
           <LazyLoadImage
             src={item.url}
-            // height="auto"
-            // width="100%"
+            height="100%"
+            width="100%"
             effect="blur"
             placeholderSrc={item.url}
             scrollPosition={scrollPosition}
             style={{
-              // borderRadius: "20px",
-              // transition: "0.2s ease-in-out",
-              // willChange: "opacity, filter",
+              borderRadius: "20px",
+              willChange: "opacity, filter",
               width: "100%",
               height: "auto",
               display: "block",
-              objectFit: "cover",
+              /// opacity & blur transition speed
+              WebkitTransition: "0.3s ease-in-out",
+              WebkitTransitionProperty: "opacity filter",
+            }}
+            wrapperProps={{
+              style: {
+                backgroundPosition: "center",
+              },
             }}
           />
         </RouterLink>
@@ -152,9 +157,8 @@ export default function Management() {
       </ImageListItem>
     );
   };
-
   // Wrap the ImageItem component with trackWindowScroll
-  const ScrollableImageItem = trackWindowScroll(ImageItem);
+  const ScrollableImageItem = React.memo(trackWindowScroll(ImageItem));
 
   return (
     <>

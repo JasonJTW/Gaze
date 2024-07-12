@@ -30,7 +30,7 @@ const globalStyles = (
   <GlobalStyles
     styles={{
       "::-webkit-scrollbar": {
-        width: "12px",
+        width: "18px",
       },
       "::-webkit-scrollbar-track": {
         background: "#030c1d",
@@ -38,7 +38,7 @@ const globalStyles = (
       "::-webkit-scrollbar-thumb": {
         backgroundColor: "#d6c9d0",
         borderRadius: "10px",
-        border: "2px solid #f1f1f1",
+        border: "6px solid #030c1d",
       },
       "::-webkit-scrollbar-thumb:hover": {
         background: "#555",
