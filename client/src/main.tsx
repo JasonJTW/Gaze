@@ -5,7 +5,12 @@ import Error from "./routes/Error.tsx";
 import Management from "./routes/Management.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
-import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
+import {
+  createTheme,
+  ThemeProvider,
+  CssBaseline,
+  GlobalStyles,
+} from "@mui/material";
 import Layout from "./components/Layout.tsx";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
@@ -13,6 +18,7 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import Content from "./routes/Content.tsx";
 import SignIn from "./routes/Signin.tsx";
+import Category from "./routes/Category.tsx";
 const theme = createTheme({
   palette: {
     background: {
@@ -20,12 +26,33 @@ const theme = createTheme({
     },
   },
 });
+const globalStyles = (
+  <GlobalStyles
+    styles={{
+      "::-webkit-scrollbar": {
+        width: "12px",
+      },
+      "::-webkit-scrollbar-track": {
+        background: "#030c1d",
+      },
+      "::-webkit-scrollbar-thumb": {
+        backgroundColor: "#d6c9d0",
+        borderRadius: "10px",
+        border: "2px solid #f1f1f1",
+      },
+      "::-webkit-scrollbar-thumb:hover": {
+        background: "#555",
+      },
+    }}
+  />
+);
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        {globalStyles}
         <Layout />,
       </ThemeProvider>
     ),
@@ -47,6 +74,7 @@ const router = createBrowserRouter([
         path: "/signin",
         element: <SignIn />,
       },
+      { path: "/category", element: <Category /> },
     ],
   },
 ]);
