@@ -4,8 +4,11 @@ import {
   ThemeProvider,
   Container,
   Grid,
+  Box,
+  TextField,
+  Button,
+  Autocomplete,
 } from "@mui/material";
-
 import { useEffect, useState } from "react";
 const hostName = import.meta.env.VITE_ServerHostName;
 
@@ -58,7 +61,14 @@ function Content() {
   useEffect(() => {
     getData(id);
   }, [id]);
-
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    alert(
+      `Category: ${data.get("category")}
+      Series: ${data.get("series")}`
+    );
+  };
   const theme = createTheme({
     components: {
       MuiContainer: {
@@ -66,6 +76,11 @@ function Content() {
           root: {
             backgroundColor: "#010c1e",
           },
+        },
+      },
+      MuiTypography: {
+        defaultProps: {
+          color: "#d6c9d0",
         },
       },
       MuiButton: {
@@ -79,6 +94,104 @@ function Content() {
             // padding: "4px",
             borderRadius: "5px",
             minWidth: "30px",
+          },
+        },
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-input": {
+              color: "#d6c9d0", // Text color
+            },
+            "& .MuiInputLabel-root": {
+              color: "#d6c9d0", // Label color
+            },
+            "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#d6c9d0", // Outline border color
+            },
+            "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+              {
+                borderColor: "#4caf50", // Outline border color when focused
+              },
+            "& .MuiInputLabel-root.Mui-focused": {
+              color: "#4caf50", // Label color when focused
+            },
+            "& .MuiInputBase-input:focus": {
+              color: "#4caf50", // Text color when focused
+            },
+            "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#4caf50", // Outline border color when hovered
+            },
+            "& .MuiInputLabel-asterisk": {
+              display: "none", // hide star sign after label
+            },
+            "& .MuiInputBase-input:-webkit-autofill": {
+              WebkitBoxShadow: "0 0 0 100px #010c1e inset",
+              WebkitTextFillColor: "#d6c9d0",
+            },
+            "& .MuiInputBase-root": {
+              "& .MuiInputAdornment-root .MuiIconButton-root": {
+                color: "#d6c9d0", // Clear icon color
+                "&:hover": {
+                  color: "#4caf50", // Clear icon hover color
+                },
+              },
+            },
+          },
+        },
+      },
+      MuiCheckbox: {
+        styleOverrides: {
+          root: {
+            color: "#d6c9d0", // Unchecked color
+            "&.Mui-checked": {
+              color: "#4caf50", // Checked color
+            },
+          },
+        },
+      },
+      MuiAutocomplete: {
+        styleOverrides: {
+          inputRoot: {
+            color: "#d6c9d0", // Text color
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#d6c9d0", // Outline border color
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#4caf50", // Outline border color when hovered
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#4caf50", // Outline border color when focused
+            },
+          },
+          popupIndicator: {
+            color: "#d6c9d0", // Popup indicator color,
+            "&.MuiAutocomplete-popupIndicator": {
+              color: "#d6c9d0", // Ensures the icon is visible
+            },
+          },
+          // clearIndicator: {
+          // color: "#d6c9d0", // Clear indicator color
+          // },
+          paper: {
+            backgroundColor: "rgba(255, 255, 255, 0.2)", // Dropdown menu background color with opacity
+            backdropFilter: "blur(5px)", // Apply blur effect
+            WebkitBackdropFilter: "blur(5px)", // Apply blur effect for Safari
+            color: "#d6c9d0", // Dropdown menu text color
+            borderRadius: "10px", // Border radius
+            border: "1px solid #fff", // Border color and width
+          },
+          option: {
+            // backgroundColor: "rgba(255, 255, 255, 0.2)", // Dropdown option background color with opacity
+            color: "#d6c9d0", // Dropdown option text color
+            '&[aria-selected="true"]': {
+              backgroundColor: "#4caf50", // Selected option background color
+              color: "#4caf50", // Selected option text color
+            },
+            "&:hover": {
+              backgroundColor: "#4caf50", // Hovered option background color
+              color: "#ffffff", // Hovered option text color
+            },
           },
         },
       },
@@ -116,6 +229,27 @@ function Content() {
   //   /// Shutter
   // ];
 
+  const categorySelections = [
+    "portrait",
+    "landscape",
+    "cityscape",
+    "macro",
+    "animal",
+    "food",
+    "2portrait",
+    "2landscape",
+    "2cityscape",
+    "2macro",
+    "2animal",
+    "2food",
+    "3portrait",
+    "3landscape",
+    "3cityscape",
+    "3macro",
+    "3animal",
+    "3food",
+  ];
+
   return (
     <ThemeProvider theme={theme}>
       <Container
@@ -132,6 +266,7 @@ function Content() {
         <Grid container>
           {data.length > 0 && (
             <>
+              {/*//* Left side img */}
               <Grid item xs={8}>
                 <Container
                   sx={{
@@ -174,8 +309,58 @@ function Content() {
                   </div>
                 </Container>
               </Grid>
+              {/*//* Right side */}
               <Grid item xs={4}>
-                <Typography variant="h2" color={"#c6cdd7"}>
+                <Typography variant="h4" color={"#c6cdd7"}>
+                  Information
+                </Typography>
+                <hr />
+                <Box
+                  component="form"
+                  onSubmit={handleSubmit}
+                  // noValidate
+                  sx={{ mt: 1, mb: 4 }}
+                >
+                  {/* //TODO: Implement drop down selection */}
+                  <Autocomplete
+                    freeSolo
+                    options={categorySelections}
+                    disableClearable
+                    selectOnFocus
+                    forcePopupIcon
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        margin="normal"
+                        fullWidth
+                        id="category"
+                        label="Category"
+                        name="category"
+                        type="search"
+                        autoFocus
+                      />
+                    )}
+                  />
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="series"
+                    label="Series"
+                    type="series"
+                    id="series"
+                    autoComplete="series"
+                  />
+                  <Button
+                    type="submit"
+                    fullWidth
+                    // variant="contained"
+                    sx={{ mt: 3, mb: 2 }}
+                  >
+                    Save
+                  </Button>
+                </Box>
+                <Typography variant="h4" color={"#c6cdd7"}>
                   MetaData
                 </Typography>
                 <hr />
