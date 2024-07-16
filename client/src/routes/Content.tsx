@@ -11,7 +11,7 @@ import {
   ListItem,
   createFilterOptions,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 const hostName = import.meta.env.VITE_ServerHostName;
 
 interface DataItem {
@@ -171,9 +171,12 @@ function Content() {
               color: "#d6c9d0", // Ensures the icon is visible
             },
           },
-          // clearIndicator: {
-          // color: "#d6c9d0", // Clear indicator color
-          // },
+          clearIndicator: {
+            color: "#d6c9d0", // Clear indicator color
+            "&:hover": {
+              color: "#4caf50", // Clear indicator hover color
+            },
+          },
           paper: {
             backgroundColor: "rgba(255, 255, 255, 0.2)", // Dropdown menu background color with opacity
             backdropFilter: "blur(5px)", // Apply blur effect
@@ -367,14 +370,17 @@ function Content() {
                   <Autocomplete
                     freeSolo
                     options={categorySelections}
-                    disableClearable
+                    disableClearable={false}
                     forcePopupIcon
                     value={category}
                     isOptionEqualToValue={(option, value) =>
                       option.title === value.title
                     }
                     onChange={(event, newValue) => {
-                      if (typeof newValue === "string") {
+                      if (newValue === null) {
+                        // 處理清除操作
+                        setCategory({ title: "" });
+                      } else if (typeof newValue === "string") {
                         setCategory({
                           title: newValue,
                         });
@@ -424,16 +430,16 @@ function Content() {
                           selected={selected}
                           {...optionProps}
                           sx={{
-                            color: selected
-                              ? "#4caf50 !important"
-                              : "#d6c9d0 !important",
-                            backgroundColor: selected
-                              ? "rgba(25, 255, 255, 1)"
-                              : "transparent",
+                            // color: selected
+                            //   ? "#4caf50 !important"
+                            //   : "#d6c9d0 !important",
+                            // backgroundColor: selected
+                            //   ? "rgba(25, 255, 255, 1)"
+                            //   : "transparent",
                             "&.Mui-selected": {
                               color: "#4caf50 !important",
                               backgroundColor:
-                                "rgba(25, 255, 255, 1) !important",
+                                "rgba(255, 255, 255, 1) !important",
                             },
                             "&:hover": {
                               backgroundColor:
@@ -456,6 +462,24 @@ function Content() {
                         name="category"
                         type="search"
                         autoFocus
+                        /// Hide clearButton
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <Fragment>
+                              {params.InputProps.endAdornment}
+                            </Fragment>
+                          ),
+                        }}
+                        sx={{
+                          '& input[type="search"]::-webkit-search-cancel-button':
+                            {
+                              display: "none",
+                            },
+                          '& input[type="search"]::-ms-clear': {
+                            display: "none",
+                          },
+                        }}
                       />
                     )}
                   />
