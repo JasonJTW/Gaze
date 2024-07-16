@@ -370,6 +370,9 @@ function Content() {
                     disableClearable
                     forcePopupIcon
                     value={category}
+                    isOptionEqualToValue={(option, value) =>
+                      option.title === value.title
+                    }
                     onChange={(event, newValue) => {
                       if (typeof newValue === "string") {
                         setCategory({
@@ -413,19 +416,18 @@ function Content() {
                       // Regular option
                       return option.title;
                     }}
-                    renderOption={(props, option) => {
+                    renderOption={(props, option, { selected }) => {
                       const { key, ...optionProps } = props;
-                      const isSelected =
-                        optionProps["aria-selected"] === "true";
                       return (
                         <ListItem
                           key={key}
+                          selected={selected}
                           {...optionProps}
                           sx={{
-                            color: isSelected
+                            color: selected
                               ? "#4caf50 !important"
                               : "#d6c9d0 !important",
-                            backgroundColor: isSelected
+                            backgroundColor: selected
                               ? "rgba(25, 255, 255, 1)"
                               : "transparent",
                             "&.Mui-selected": {
