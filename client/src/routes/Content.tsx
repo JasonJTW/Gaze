@@ -8,6 +8,8 @@ import {
   TextField,
   Button,
   Autocomplete,
+  ListItem,
+  createFilterOptions,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 const hostName = import.meta.env.VITE_ServerHostName;
@@ -129,14 +131,14 @@ function Content() {
               WebkitBoxShadow: "0 0 0 100px #010c1e inset",
               WebkitTextFillColor: "#d6c9d0",
             },
-            "& .MuiInputBase-root": {
-              "& .MuiInputAdornment-root .MuiIconButton-root": {
-                color: "#d6c9d0", // Clear icon color
-                "&:hover": {
-                  color: "#4caf50", // Clear icon hover color
-                },
-              },
-            },
+            // "& .MuiInputBase-root": {
+            //   "& .MuiInputAdornment-root .MuiIconButton-root": {
+            //     color: "#d6c9d0", // Clear icon color
+            //     "&:hover": {
+            //       color: "#4caf50", // Clear icon hover color
+            //     },
+            //   },
+            // },
           },
         },
       },
@@ -165,7 +167,6 @@ function Content() {
             },
           },
           popupIndicator: {
-            color: "#d6c9d0", // Popup indicator color,
             "&.MuiAutocomplete-popupIndicator": {
               color: "#d6c9d0", // Ensures the icon is visible
             },
@@ -176,7 +177,7 @@ function Content() {
           paper: {
             backgroundColor: "rgba(255, 255, 255, 0.2)", // Dropdown menu background color with opacity
             backdropFilter: "blur(5px)", // Apply blur effect
-            WebkitBackdropFilter: "blur(5px)", // Apply blur effect for Safari
+            // WebkitBackdropFilter: "blur(5px)", // Apply blur effect for Safari
             color: "#d6c9d0", // Dropdown menu text color
             borderRadius: "10px", // Border radius
             border: "1px solid #fff", // Border color and width
@@ -185,11 +186,11 @@ function Content() {
             // backgroundColor: "rgba(255, 255, 255, 0.2)", // Dropdown option background color with opacity
             color: "#d6c9d0", // Dropdown option text color
             '&[aria-selected="true"]': {
-              backgroundColor: "#4caf50", // Selected option background color
+              backgroundColor: "rgba(25, 255, 255, 1)", // Selected option background color
               color: "#4caf50", // Selected option text color
             },
             "&:hover": {
-              backgroundColor: "#4caf50", // Hovered option background color
+              backgroundColor: "rgba(25, 255, 255, 1)!important", // Hovered option background color
               color: "#ffffff", // Hovered option text color
             },
           },
@@ -228,26 +229,67 @@ function Content() {
   //   "YDimension"
   //   /// Shutter
   // ];
-
-  const categorySelections = [
-    "portrait",
-    "landscape",
-    "cityscape",
-    "macro",
-    "animal",
-    "food",
-    "2portrait",
-    "2landscape",
-    "2cityscape",
-    "2macro",
-    "2animal",
-    "2food",
-    "3portrait",
-    "3landscape",
-    "3cityscape",
-    "3macro",
-    "3animal",
-    "3food",
+  const filter = createFilterOptions<CategoryOptionType>();
+  interface CategoryOptionType {
+    inputValue?: string;
+    title: string;
+  }
+  const [category, setCategory] = useState<CategoryOptionType>({ title: "" });
+  const categorySelections: CategoryOptionType[] = [
+    {
+      title: "portrait",
+    },
+    {
+      title: "landscape",
+    },
+    {
+      title: "cityscape",
+    },
+    {
+      title: "macro",
+    },
+    {
+      title: "animal",
+    },
+    {
+      title: "food",
+    },
+    {
+      title: "2portrait",
+    },
+    {
+      title: "2landscape",
+    },
+    {
+      title: "2cityscape",
+    },
+    {
+      title: "2macro",
+    },
+    {
+      title: "2animal",
+    },
+    {
+      title: "2food",
+    },
+    {
+      title: "3portrait",
+    },
+    {
+      title: "3landscape",
+    },
+    {
+      title: "3cityscape",
+    },
+    {
+      title: "3macro",
+    },
+    {
+      title: "3animal",
+    },
+    {
+      title: "3food",
+    },
   ];
 
   return (
@@ -326,8 +368,82 @@ function Content() {
                     freeSolo
                     options={categorySelections}
                     disableClearable
-                    selectOnFocus
                     forcePopupIcon
+                    value={category}
+                    onChange={(event, newValue) => {
+                      if (typeof newValue === "string") {
+                        setCategory({
+                          title: newValue,
+                        });
+                      } else if (newValue && newValue.inputValue) {
+                        // Create a new value from the user input
+                        setCategory({
+                          title: newValue.inputValue,
+                        });
+                      } else {
+                        setCategory(newValue);
+                      }
+                    }}
+                    filterOptions={(options, params) => {
+                      const filtered = filter(options, params);
+
+                      const { inputValue } = params;
+                      // Suggest the creation of a new value
+                      const isExisting = options.some(
+                        (option) => inputValue === option.title
+                      );
+                      if (inputValue !== "" && !isExisting) {
+                        filtered.push({
+                          inputValue,
+                          title: `Add new "${inputValue}" category`,
+                        });
+                      }
+
+                      return filtered;
+                    }}
+                    getOptionLabel={(option) => {
+                      // Value selected with enter, right from the input
+                      if (typeof option === "string") {
+                        return option;
+                      }
+                      // Add "xxx" option created dynamically
+                      if (option.inputValue) {
+                        return option.inputValue;
+                      }
+                      // Regular option
+                      return option.title;
+                    }}
+                    renderOption={(props, option) => {
+                      const { key, ...optionProps } = props;
+                      const isSelected =
+                        optionProps["aria-selected"] === "true";
+                      return (
+                        <ListItem
+                          key={key}
+                          {...optionProps}
+                          sx={{
+                            color: isSelected
+                              ? "#4caf50 !important"
+                              : "#d6c9d0 !important",
+                            backgroundColor: isSelected
+                              ? "rgba(25, 255, 255, 1)"
+                              : "transparent",
+                            "&.Mui-selected": {
+                              color: "#4caf50 !important",
+                              backgroundColor:
+                                "rgba(25, 255, 255, 1) !important",
+                            },
+                            "&:hover": {
+                              backgroundColor:
+                                "rgba(25, 255, 255, 1) !important",
+                              color: "#ffffff !important",
+                            },
+                          }}
+                        >
+                          {option.title}
+                        </ListItem>
+                      );
+                    }}
                     renderInput={(params) => (
                       <TextField
                         {...params}
