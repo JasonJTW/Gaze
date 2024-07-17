@@ -5,6 +5,7 @@ const router = express.Router();
 import uploadAPI from "./uploadPhoto";
 import getPhotoAPI from "./getPhoto";
 import authAPI from "./auth";
+import variantAPI from "./variant";
 router.get("/", (req: Request, res: Response) => {
   res.send("this is the api route");
 });
@@ -12,5 +13,6 @@ router.get("/", (req: Request, res: Response) => {
 router.use("/upload", uploadAPI);
 router.use("/photo", getPhotoAPI);
 router.use("/user", authAPI);
+router.use("/variant", variantAPI);
 
 export default router;

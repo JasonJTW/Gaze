@@ -14,7 +14,7 @@ import {
 import { useEffect, useState, Fragment } from "react";
 const hostName = import.meta.env.VITE_ServerHostName;
 
-interface DataItem {
+interface imageDataItem {
   id: number;
   url: string;
   photographer: string | null;
@@ -24,9 +24,9 @@ interface DataItem {
 }
 
 function Content() {
-  const [data, setData] = useState<DataItem[]>([]);
+  const [imageData, setImageData] = useState<imageDataItem[]>([]);
   const [id, setId] = useState<string | null>(null);
-  const getData = async (id: string | null) => {
+  const getImageData = async (id: string | null) => {
     if (!id) {
       return;
     }
@@ -40,15 +40,15 @@ function Content() {
 
       if (!response.ok) {
         const errorResponse = await response.json();
-        throw new Error(errorResponse.message || "Failed to get data.");
+        throw new Error(errorResponse.message || "Failed to get imageData.");
       }
       const result = await response.json();
       console.log(result.data);
-      setData(result.data);
+      setImageData(result.data);
     } catch (error) {
       const errorMessage = (error as Error).message;
-      console.error("Error fetching data:", errorMessage);
-      alert("Failed to get data: " + errorMessage);
+      console.error("Error fetching imageData:", errorMessage);
+      alert("Failed to get imageData: " + errorMessage);
     }
   };
 
@@ -61,14 +61,43 @@ function Content() {
 
   //* Fetch data from api
   useEffect(() => {
-    getData(id);
+    getImageData(id);
   }, [id]);
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+
+    /// fetch category form to categoryAPI
+    try {
+      const result = await fetch(`${hostName}/api/variant/insert`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          category: data.get("category"),
+          series: data.get("series"),
+          id: id,
+          url: imageData[0].url,
+        }),
+      });
+      if (!result.ok) {
+        const errorResponse = await result.json();
+        throw new Error(
+          errorResponse.message || "Failed to fetch categoryAPI."
+        );
+      }
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      console.error("Error fetching categoryAPI:", errorMessage);
+      alert("Failed to call categoryAPI: " + errorMessage);
+    }
+
     alert(
       `Category: ${data.get("category")}
-      Series: ${data.get("series")}`
+      Series: ${data.get("series")}
+      `
     );
   };
   const theme = createTheme({
@@ -309,7 +338,7 @@ function Content() {
         }}
       >
         <Grid container>
-          {data.length > 0 && (
+          {imageData.length > 0 && (
             <>
               {/*//* Left side img */}
               <Grid item xs={8}>
@@ -322,8 +351,8 @@ function Content() {
                   }}
                 >
                   <img
-                    src={data[0].url}
-                    alt={data[0].original_name}
+                    src={imageData[0].url}
+                    alt={imageData[0].original_name}
                     style={{
                       borderRadius: "8px",
                       boxShadow: "0px 2px 50px 10px rgba(0, 0, 0, 0.5)",
@@ -339,7 +368,7 @@ function Content() {
                       marginLeft={2}
                       marginRight={8}
                     >
-                      " {data[0].original_name} "
+                      " {imageData[0].original_name} "
                     </Typography>
                     <Typography variant="overline" color={"#c6cdd7"}>
                       By_
@@ -349,7 +378,7 @@ function Content() {
                       color={"#d6c9d0"}
                       marginLeft={2}
                     >
-                      {data[0].photographer || "undefined"}
+                      {imageData[0].photographer || "undefined"}
                     </Typography>
                   </div>
                 </Container>
@@ -503,11 +532,11 @@ function Content() {
                   </Button>
                 </Box>
                 <Typography variant="h4" color={"#c6cdd7"}>
-                  MetaData
+                  Metadata
                 </Typography>
                 <hr />
-                {data[0].exif &&
-                  Object.entries(data[0].exif).map(([key, value]) =>
+                {imageData[0].exif &&
+                  Object.entries(imageData[0].exif).map(([key, value]) =>
                     !excludedKeys.includes(key) ? (
                       <Container
                         key={key}
@@ -535,8 +564,8 @@ function Content() {
                     ) : null
                   )}
                 /// Sub Exif
-                {data[0].exif &&
-                  (data[0].exif as { SubExif: Record<string, unknown> })
+                {imageData[0].exif &&
+                  (imageData[0].exif as { SubExif: Record<string, unknown> })
                     .SubExif && (
                     <>
                       <Typography variant="h5" color={"#c6cdd7"}>
@@ -544,8 +573,11 @@ function Content() {
                       </Typography>
                       <hr />
                       {Object.entries(
-                        (data[0].exif as { SubExif: Record<string, unknown> })
-                          .SubExif
+                        (
+                          imageData[0].exif as {
+                            SubExif: Record<string, unknown>;
+                          }
+                        ).SubExif
                       ).map(([key, value]) => (
                         <Container
                           key={key}
@@ -574,8 +606,8 @@ function Content() {
                     </>
                   )}
                 /// GPS Info
-                {data[0].exif &&
-                  (data[0].exif as { GPSInfo: Record<string, unknown> })
+                {imageData[0].exif &&
+                  (imageData[0].exif as { GPSInfo: Record<string, unknown> })
                     .GPSInfo && (
                     <>
                       <Typography variant="h5" color={"#c6cdd7"}>
@@ -583,8 +615,11 @@ function Content() {
                       </Typography>
                       <hr />
                       {Object.entries(
-                        (data[0].exif as { GPSInfo: Record<string, unknown> })
-                          .GPSInfo
+                        (
+                          imageData[0].exif as {
+                            GPSInfo: Record<string, unknown>;
+                          }
+                        ).GPSInfo
                       ).map(([key, value]) => (
                         <Container
                           key={key}
