@@ -12,7 +12,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 import MenuIcon from "@mui/icons-material/Menu";
 
-const pages = ["Upload", "Management", "Content", "Category"];
+const pages = ["Upload", "Management", "Content", "Category", "Gallery"];
 
 interface Props {
   /**
@@ -39,44 +39,59 @@ function HideOnScroll(props: Props) {
   );
 }
 
-function Nav() {
-  const theme = createTheme({
-    components: {
-      MuiContainer: {
-        styleOverrides: {
-          root: {
-            backgroundColor: "#010c1e",
-          },
-        },
-      },
-      MuiAppBar: {
-        styleOverrides: {
-          root: {
-            background:
-              "linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 100%)",
-            backdropFilter: "blur(10px)",
-            boxShadow: "none",
-            // minHeight: "100px",
-          },
-        },
-      },
-      MuiLink: {
-        styleOverrides: {
-          root: {
-            marginLeft: "30px",
-          },
-        },
-      },
-      MuiToolbar: {
-        styleOverrides: {
-          dense: {
-            height: 80,
-            minHeight: 80,
-          },
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#1976d2",
+    },
+  },
+  components: {
+    MuiContainer: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#010c1e",
         },
       },
     },
-  });
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          background:
+            "linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 100%)",
+          backdropFilter: "blur(10px)",
+          boxShadow: "none",
+          // minHeight: "100px",
+        },
+      },
+    },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          marginLeft: "30px",
+        },
+      },
+    },
+    MuiToolbar: {
+      styleOverrides: {
+        dense: {
+          height: 80,
+          minHeight: 80,
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.palette.primary.main, // MenuIcon color
+          "&:hover": {
+            color: "#cdc1c8", // MenuIcon color when hovered
+          },
+        }),
+      },
+    },
+  },
+});
+function Nav() {
   return (
     <>
       <ThemeProvider theme={theme}>
