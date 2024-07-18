@@ -135,6 +135,7 @@ export default function Management() {
                 backgroundPosition: "center",
               },
             }}
+            threshold={10}
           />
         </RouterLink>
         <Button

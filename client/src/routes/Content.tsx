@@ -69,7 +69,7 @@ function Content() {
 
     /// fetch category form to categoryAPI
     try {
-      const result = await fetch(`${hostName}/api/variant/insert`, {
+      const response = await fetch(`${hostName}/api/variant/insert`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -82,23 +82,25 @@ function Content() {
           url: imageData[0].url,
         }),
       });
-      if (!result.ok) {
-        const errorResponse = await result.json();
+      if (!response.ok) {
+        const errorResponse = await response.json();
         throw new Error(
           errorResponse.message || "Failed to fetch categoryAPI."
         );
       }
+      const result = await response.json();
+
+      alert(
+        result.message +
+          `Category: ${data.get("category")}
+        Series: ${data.get("series")}
+        `
+      );
     } catch (error) {
       const errorMessage = (error as Error).message;
       console.error("Error fetching categoryAPI:", errorMessage);
       alert("Failed to call categoryAPI: " + errorMessage);
     }
-
-    alert(
-      `Category: ${data.get("category")}
-      Series: ${data.get("series")}
-      `
-    );
   };
   const theme = createTheme({
     components: {

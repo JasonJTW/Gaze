@@ -99,7 +99,7 @@ router.post("/insert", async (req: Request, res: Response) => {
       //   })}`
       // );
       seriesID = seriesResult.insertId;
-      console.log(`New series successfully added as id: ${categoryID}`);
+      console.log(`New series successfully added as id: ${seriesID}`);
     }
 
     /// Create new variants in db
