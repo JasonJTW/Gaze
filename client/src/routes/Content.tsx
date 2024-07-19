@@ -268,64 +268,43 @@ function Content() {
     inputValue?: string;
     title: string;
   }
-  const [category, setCategory] = useState<CategoryOptionType>({ title: "" });
-  const categorySelections: CategoryOptionType[] = [
-    {
-      title: "portrait",
-    },
-    {
-      title: "landscape",
-    },
-    {
-      title: "cityscape",
-    },
-    {
-      title: "macro",
-    },
-    {
-      title: "animal",
-    },
-    {
-      title: "food",
-    },
-    {
-      title: "2portrait",
-    },
-    {
-      title: "2landscape",
-    },
-    {
-      title: "2cityscape",
-    },
-    {
-      title: "2macro",
-    },
-    {
-      title: "2animal",
-    },
-    {
-      title: "2food",
-    },
-    {
-      title: "3portrait",
-    },
-    {
-      title: "3landscape",
-    },
-    {
-      title: "3cityscape",
-    },
-    {
-      title: "3macro",
-    },
-    {
-      title: "3animal",
-    },
-    {
-      title: "3food",
-    },
-  ];
 
+  async function getCategoryTitle() {
+    try {
+      const response = await fetch(`${hostName}/api/variant/get_category`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(
+          errorResponse.message || "Failed to fetch getCategoryAPI."
+        );
+      }
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      console.error("Error fetching getCategoryAPI:", errorMessage);
+      alert("Failed to call getCategoryAPI: " + errorMessage);
+    }
+  }
+  const [category, setCategory] = useState<CategoryOptionType>({ title: "" });
+  const [categorySelections, setCategorySelections] = useState<
+    CategoryOptionType[]
+  >([]);
+  useEffect(() => {
+    const fetchCategoryTitles = async () => {
+      const titles = await getCategoryTitle();
+      if (titles) {
+        setCategorySelections(titles);
+      }
+    };
+    fetchCategoryTitles();
+  }, []);
   return (
     <ThemeProvider theme={theme}>
       <Container

@@ -128,7 +128,7 @@ const FullscreenImageDialog: React.FC<FullscreenImageDialogProps> = ({
             alt="Fullscreen"
             style={{
               maxWidth: "100%",
-              maxHeight: "100%",
+              maxHeight: "80%",
             }}
             onContextMenu={(e) => e.preventDefault()}
           />

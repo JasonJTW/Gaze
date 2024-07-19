@@ -111,4 +111,25 @@ router.post("/insert", async (req: Request, res: Response) => {
   res.status(200).json({ message: "Success!" });
 });
 
+//* Get all categories title
+router.get("/get_category", async (req: Request, res: Response) => {
+  try {
+    const query = `SELECT title FROM categories WHERE title != ""`;
+
+    const [result] = await db.query(query);
+    console.log(
+      `All categories title: ${util.inspect(result, {
+        showHidden: false,
+        depth: null,
+        colors: true,
+      })}`
+    );
+    res.status(200).json({ data: result });
+  } catch (err) {
+    console.log(`Error getting all categories: ${err}`);
+    const errorMessage = (err as Error).message;
+    res.status(400).json({ message: errorMessage });
+  }
+});
+
 export default router;
