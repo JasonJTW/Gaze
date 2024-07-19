@@ -6,8 +6,6 @@ import {
   Dialog,
   DialogContent,
   IconButton,
-  Fade,
-  Slide,
   Zoom,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
@@ -17,6 +15,7 @@ import { imageItem } from "../types/imageItem";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import { FullscreenImageDialogProps } from "../types/fullScreenImageDialog";
+import { BlurhashCanvas } from "react-blurhash";
 const hostName = import.meta.env.VITE_ServerHostName;
 const theme = createTheme({
   components: {
@@ -151,6 +150,15 @@ function Gallery() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const [loadingStates, setLoadingStates] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const handleImageLoad = (key: string) => {
+    setLoadingStates((prevStates) => ({
+      ...prevStates,
+      [key]: true,
+    }));
+  };
   const handleImageClick = (url: string) => {
     setSelectedImage(url);
     setDialogOpen(true);
@@ -227,22 +235,59 @@ function Gallery() {
               >
                 {/* //* Photo */}
                 {column.map((image, index) => (
-                  <LazyLoadImage
-                    effect="blur"
-                    key={index}
-                    src={image.url}
-                    style={{
-                      width: "100%",
-                      height: "auto",
-                      objectFit: "cover",
-                      borderRadius: "10px",
-                      display: "block",
-                      cursor: "pointer",
-                    }}
-                    threshold={10}
-                    placeholderSrc={image.url}
-                    onClick={() => handleImageClick(image.url)}
-                  />
+                  <>
+                    {!loadingStates[`${columnIndex}-${index}`] &&
+                      image.blurhash && (
+                        <Container
+                          sx={{
+                            display: "flex",
+                            margin: 0,
+                            padding: "0px !important",
+                          }}
+                          key={`${index}blur`}
+                        >
+                          <BlurhashCanvas
+                            hash={image.blurhash}
+                            width={100}
+                            height={
+                              image.exif?.XDimension && image.exif?.YDimension
+                                ? Math.round(
+                                    (image.exif.YDimension /
+                                      image.exif.XDimension) *
+                                      100
+                                  )
+                                : 100
+                            }
+                            style={{
+                              width: "100%",
+                              height: "auto",
+                              borderRadius: "10px",
+                            }}
+                          />
+                        </Container>
+                      )}
+                    <LazyLoadImage
+                      effect="blur"
+                      key={index}
+                      src={image.url}
+                      width={"100%"}
+                      height={"auto"}
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        objectFit: "cover",
+                        borderRadius: "10px",
+                        display: "block",
+                        cursor: "pointer",
+                      }}
+                      threshold={10}
+                      afterLoad={() =>
+                        handleImageLoad(`${columnIndex}-${index}`)
+                      }
+                      placeholderSrc={image.url}
+                      onClick={() => handleImageClick(image.url)}
+                    />
+                  </>
                 ))}
               </Container>
               <FullscreenImageDialog

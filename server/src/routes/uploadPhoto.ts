@@ -9,6 +9,10 @@ import mysql, { RowDataPacket } from "mysql2";
 import exif from "jpeg-exif";
 import util from "util";
 import sizeOf from "buffer-image-size";
+
+import { encode } from "blurhash";
+import sharp from "sharp";
+
 const maxAllowedFiles = Number(process.env.maxAllowedFiles);
 
 const router = express.Router();
@@ -74,6 +78,27 @@ function flattenObj(object: Record<string, any>) {
 function handleShutter(shutter: number) {
   const shutterSpeed = `1/${Math.round(1 / shutter)}`;
   return shutterSpeed;
+}
+
+//* Encode image to blurhash for lazy loading placeholder
+async function encodeImageToBlurhash(buffer: Buffer): Promise<string> {
+  return new Promise((resolve, reject) => {
+    sharp(buffer)
+      .raw()
+      .ensureAlpha()
+      .resize(32, null)
+      .toBuffer((err, resizedBuffer, { width, height }) => {
+        if (err) return reject(err);
+        const blurhash = encode(
+          new Uint8ClampedArray(resizedBuffer),
+          width,
+          height,
+          4,
+          4
+        );
+        resolve(blurhash);
+      });
+  });
 }
 
 router.get("/", (req: Request, res: Response) => {
@@ -152,17 +177,21 @@ router.post(
           //* send to s3
           await s3.send(command);
 
-          //* Send image info, EXIF to DB
+          //* Send image info, EXIF, blurhash to DB
+
+          /// Generate BlurHash
+          const blurhash = await encodeImageToBlurhash(image.buffer);
+
           const url: string = cloudfrontUrl + fileName;
           console.log(`url: ${url}`);
-          const query = `insert into photos(url, photographer, category, original_name, exif) values(?, ?, ?, ?, ?)`;
-          // TODO: Handle EXIF, photographer and category info
+          const query = `insert into photos(url, photographer, original_name, exif, blurhash) values(?, ?, ?, ?, ?)`;
+          // TODO: Handle EXIF, photographer and info
           await db.query(query, [
             url,
             photographer,
-            null,
             image.originalname,
             JSON.stringify(metadata),
+            blurhash,
           ]);
         }
 

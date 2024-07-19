@@ -17,6 +17,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/exif": "^0.6.5",
     "bcrypt": "^5.1.1",
+    "blurhash": "^2.0.5",
     "buffer-image-size": "^0.6.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

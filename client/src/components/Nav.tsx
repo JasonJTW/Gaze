@@ -12,7 +12,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 import MenuIcon from "@mui/icons-material/Menu";
 
-const pages = ["Upload", "Management", "Content", "Category", "Gallery"];
+const pages = ["Upload", "Management", "Gallery", "Category"];
 
 interface Props {
   /**
@@ -111,7 +111,7 @@ function Nav() {
                   sx={{
                     "&:hover": {
                       color: "#cdc1c8",
-                      fontWeight: "bold",
+                      // fontWeight: "bold",
                     },
                   }}
                 >

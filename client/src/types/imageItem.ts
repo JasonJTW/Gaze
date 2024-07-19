@@ -7,7 +7,14 @@ export interface imageItem {
   photographer: string | null;
   category: string | null;
   original_name: string;
-  exif: object | null;
+  exif: ExifData | null;
   created_at: string;
   updated_at: string;
+  blurhash: string | null;
+}
+
+export interface ExifData extends Record<string, unknown> {
+  XDimension?: number;
+  YDimension?: number;
+  // 添加你知道的其他属性
 }
