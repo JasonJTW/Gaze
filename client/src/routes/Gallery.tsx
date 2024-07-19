@@ -10,11 +10,12 @@ import {
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
 import CloseIcon from "@mui/icons-material/Close";
-import { useEffect, useState, forwardRef } from "react";
+import { useEffect, useState, forwardRef, MouseEvent } from "react";
 import { imageItem } from "../types/imageItem";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import { FullscreenImageDialogProps } from "../types/fullScreenImageDialog";
+import { BlurhashCanvas } from "react-blurhash";
 const hostName = import.meta.env.VITE_ServerHostName;
 const theme = createTheme({
   components: {
@@ -49,6 +50,17 @@ const theme = createTheme({
       },
     },
   },
+  transitions: {
+    duration: {
+      shortest: 200,
+      shorter: 200,
+      short: 250,
+      standard: 300,
+      complex: 375,
+      enteringScreen: 225,
+      leavingScreen: 250,
+    },
+  },
 });
 function splitArrayIntoColumns<T>(array: T[], columns: number): T[][] {
   const result: T[][] = Array.from({ length: columns }, () => []);
@@ -64,7 +76,8 @@ const Transition = forwardRef(function Transition(
   },
   ref: React.Ref<unknown>
 ) {
-  return <Zoom ref={ref} {...props} />;
+  /// <Fade, Slide, Zoom />
+  return <Zoom ref={ref} {...props} timeout={300} />;
 });
 const FullscreenImageDialog: React.FC<FullscreenImageDialogProps> = ({
   open,
@@ -79,7 +92,7 @@ const FullscreenImageDialog: React.FC<FullscreenImageDialogProps> = ({
       TransitionComponent={Transition}
       sx={{
         ".MuiBackdrop-root": {
-          backgroundColor: "rgba(0, 0, 0, 0.2)",
+          backgroundColor: "rgba(0, 0, 0, 0.3)",
           backdropFilter: "blur(15px)",
         },
         ".MuiDialog-paper": {
@@ -92,7 +105,7 @@ const FullscreenImageDialog: React.FC<FullscreenImageDialogProps> = ({
         color="inherit"
         onClick={onClose}
         aria-label="close"
-        sx={{ position: "absolute", top: 10, right: 20 }}
+        sx={{ position: "absolute", top: 10, right: 20, zIndex: 99 }}
       >
         <CloseIcon />
       </IconButton>
@@ -103,6 +116,11 @@ const FullscreenImageDialog: React.FC<FullscreenImageDialogProps> = ({
           alignItems: "center",
           padding: 0,
         }}
+        onClick={(e: MouseEvent<HTMLDivElement>) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
       >
         {imageUrl && (
           <img
@@ -112,6 +130,7 @@ const FullscreenImageDialog: React.FC<FullscreenImageDialogProps> = ({
               maxWidth: "100%",
               maxHeight: "100%",
             }}
+            onContextMenu={(e) => e.preventDefault()}
           />
         )}
       </DialogContent>
@@ -131,6 +150,15 @@ function Gallery() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const [loadingStates, setLoadingStates] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const handleImageLoad = (key: string) => {
+    setLoadingStates((prevStates) => ({
+      ...prevStates,
+      [key]: true,
+    }));
+  };
   const handleImageClick = (url: string) => {
     setSelectedImage(url);
     setDialogOpen(true);
@@ -207,22 +235,59 @@ function Gallery() {
               >
                 {/* //* Photo */}
                 {column.map((image, index) => (
-                  <LazyLoadImage
-                    effect="blur"
-                    key={index}
-                    src={image.url}
-                    style={{
-                      width: "100%",
-                      height: "auto",
-                      objectFit: "cover",
-                      borderRadius: "10px",
-                      display: "block",
-                      cursor: "pointer",
-                    }}
-                    threshold={10}
-                    placeholderSrc={image.url}
-                    onClick={() => handleImageClick(image.url)}
-                  />
+                  <>
+                    {!loadingStates[`${columnIndex}-${index}`] &&
+                      image.blurhash && (
+                        <Container
+                          sx={{
+                            display: "flex",
+                            margin: 0,
+                            padding: "0px !important",
+                          }}
+                          key={`${index}blur`}
+                        >
+                          <BlurhashCanvas
+                            hash={image.blurhash}
+                            width={100}
+                            height={
+                              image.exif?.XDimension && image.exif?.YDimension
+                                ? Math.round(
+                                    (image.exif.YDimension /
+                                      image.exif.XDimension) *
+                                      100
+                                  )
+                                : 100
+                            }
+                            style={{
+                              width: "100%",
+                              height: "auto",
+                              borderRadius: "10px",
+                            }}
+                          />
+                        </Container>
+                      )}
+                    <LazyLoadImage
+                      effect="blur"
+                      key={index}
+                      src={image.url}
+                      width={"100%"}
+                      height={"auto"}
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        objectFit: "cover",
+                        borderRadius: "10px",
+                        display: "block",
+                        cursor: "pointer",
+                      }}
+                      threshold={10}
+                      afterLoad={() =>
+                        handleImageLoad(`${columnIndex}-${index}`)
+                      }
+                      placeholderSrc={image.url}
+                      onClick={() => handleImageClick(image.url)}
+                    />
+                  </>
                 ))}
               </Container>
               <FullscreenImageDialog

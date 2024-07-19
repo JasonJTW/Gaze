@@ -18,7 +18,9 @@
     "@mui/icons-material": "^5.15.21",
     "@mui/material": "^5.15.21",
     "@types/react-lazy-load-image-component": "^1.6.4",
+    "blurhash": "^2.0.5",
     "react": "^18.2.0",
+    "react-blurhash": "^0.3.0",
     "react-dom": "^18.2.0",
     "react-lazy-load-image-component": "^1.6.2",
     "react-router-dom": "^6.23.1"
