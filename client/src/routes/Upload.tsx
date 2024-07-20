@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import ImageIcon from "@mui/icons-material/Image";
+import CategorizeForm from "../components/CategorizeForm";
 
 function Upload() {
   /// Maximum number of uploads
@@ -37,19 +38,27 @@ function Upload() {
 
   /// Alert user and clear selected files if amounts > maxAllowedFiles
   useEffect(() => {
-    if (selectedFiles.length < 1) return;
+    if (selectedFiles.length < 1) {
+      setCategoryFormVisibility("none");
+      return;
+    }
     if (fileInputRef.current && selectedFiles.length > maxAllowedFiles) {
       alert(`You can upload a maximum of ${maxAllowedFiles} files !`);
+      setCategoryFormVisibility("none");
       /// Clear all files from selection
       setSelectedFiles([]);
       fileInputRef.current.value = "";
     }
+    setCategoryFormVisibility("true");
     console.log(selectedFiles);
   }, [selectedFiles]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [previews, setPreviews] = useState<
     { name: string; url: string; size: string }[]
   >([]);
+
+  const [categoryFormVisibility, setCategoryFormVisibility] = useState("none");
+
   useEffect(() => {
     if (selectedFiles.length > maxAllowedFiles) return;
     const newPreviews = selectedFiles.map((file) => ({
@@ -196,6 +205,24 @@ function Upload() {
                     Send
                   </Button>
                 </form>
+                <Container
+                  sx={{
+                    minWidth: "100px",
+                    maxWidth: "300px",
+                    margin: 0,
+                    marginTop: "70px",
+                  }}
+                >
+                  <CategorizeForm
+                    handleSubmit={(event) => {
+                      event.preventDefault();
+                      const data = new FormData(event.currentTarget);
+                      alert(`category: ${data.get("category")},
+          series: ${data.get("series")}`);
+                    }}
+                    displayValue={categoryFormVisibility}
+                  />
+                </Container>
               </Container>
             </Grid>
             <Grid
