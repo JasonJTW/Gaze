@@ -4,14 +4,9 @@ import {
   ThemeProvider,
   Container,
   Grid,
-  Box,
-  TextField,
-  Button,
-  Autocomplete,
-  ListItem,
-  createFilterOptions,
 } from "@mui/material";
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useState } from "react";
+import CategorizeForm from "../components/CategorizeForm";
 const hostName = import.meta.env.VITE_ServerHostName;
 
 interface imageDataItem {
@@ -263,48 +258,7 @@ function Content() {
   //   "YDimension"
   //   /// Shutter
   // ];
-  const filter = createFilterOptions<CategoryOptionType>();
-  interface CategoryOptionType {
-    inputValue?: string;
-    title: string;
-  }
 
-  async function getCategoryTitle() {
-    try {
-      const response = await fetch(`${hostName}/api/variant/get_category`, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        const errorResponse = await response.json();
-        throw new Error(
-          errorResponse.message || "Failed to fetch getCategoryAPI."
-        );
-      }
-      const result = await response.json();
-      return result.data;
-    } catch (error) {
-      const errorMessage = (error as Error).message;
-      console.error("Error fetching getCategoryAPI:", errorMessage);
-      alert("Failed to call getCategoryAPI: " + errorMessage);
-    }
-  }
-  const [category, setCategory] = useState<CategoryOptionType>({ title: "" });
-  const [categorySelections, setCategorySelections] = useState<
-    CategoryOptionType[]
-  >([]);
-  useEffect(() => {
-    const fetchCategoryTitles = async () => {
-      const titles = await getCategoryTitle();
-      if (titles) {
-        setCategorySelections(titles);
-      }
-    };
-    fetchCategoryTitles();
-  }, []);
   return (
     <ThemeProvider theme={theme}>
       <Container
@@ -370,148 +324,10 @@ function Content() {
                   Information
                 </Typography>
                 <hr />
-                <Box
-                  component="form"
-                  onSubmit={handleSubmit}
-                  // noValidate
-                  sx={{ mt: 1, mb: 4 }}
-                >
-                  {/* //TODO: Implement drop down selection */}
-                  <Autocomplete
-                    freeSolo
-                    options={categorySelections}
-                    disableClearable={false}
-                    forcePopupIcon
-                    value={category}
-                    isOptionEqualToValue={(option, value) =>
-                      option.title === value.title
-                    }
-                    onChange={(event, newValue) => {
-                      if (newValue === null) {
-                        // 處理清除操作
-                        setCategory({ title: "" });
-                      } else if (typeof newValue === "string") {
-                        setCategory({
-                          title: newValue,
-                        });
-                      } else if (newValue && newValue.inputValue) {
-                        // Create a new value from the user input
-                        setCategory({
-                          title: newValue.inputValue,
-                        });
-                      } else {
-                        setCategory(newValue);
-                      }
-                    }}
-                    filterOptions={(options, params) => {
-                      const filtered = filter(options, params);
-
-                      const { inputValue } = params;
-                      // Suggest the creation of a new value
-                      const isExisting = options.some(
-                        (option) => inputValue === option.title
-                      );
-                      if (inputValue !== "" && !isExisting) {
-                        filtered.push({
-                          inputValue,
-                          title: `Add new "${inputValue}" category`,
-                        });
-                      }
-
-                      return filtered;
-                    }}
-                    getOptionLabel={(option) => {
-                      // Value selected with enter, right from the input
-                      if (typeof option === "string") {
-                        return option;
-                      }
-                      // Add "xxx" option created dynamically
-                      if (option.inputValue) {
-                        return option.inputValue;
-                      }
-                      // Regular option
-                      return option.title;
-                    }}
-                    renderOption={(props, option, { selected }) => {
-                      const { key, ...optionProps } = props;
-                      return (
-                        <ListItem
-                          key={key}
-                          selected={selected}
-                          {...optionProps}
-                          sx={{
-                            // color: selected
-                            //   ? "#4caf50 !important"
-                            //   : "#d6c9d0 !important",
-                            // backgroundColor: selected
-                            //   ? "rgba(25, 255, 255, 1)"
-                            //   : "transparent",
-                            "&.Mui-selected": {
-                              color: "#4caf50 !important",
-                              backgroundColor:
-                                "rgba(255, 255, 255, 1) !important",
-                            },
-                            "&:hover": {
-                              backgroundColor:
-                                "rgba(25, 255, 255, 1) !important",
-                              color: "#ffffff !important",
-                            },
-                          }}
-                        >
-                          {option.title}
-                        </ListItem>
-                      );
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        margin="normal"
-                        fullWidth
-                        id="category"
-                        label="Category"
-                        name="category"
-                        type="search"
-                        autoFocus
-                        /// Hide clearButton
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <Fragment>
-                              {params.InputProps.endAdornment}
-                            </Fragment>
-                          ),
-                        }}
-                        sx={{
-                          '& input[type="search"]::-webkit-search-cancel-button':
-                            {
-                              display: "none",
-                            },
-                          '& input[type="search"]::-ms-clear': {
-                            display: "none",
-                          },
-                        }}
-                      />
-                    )}
-                  />
-                  <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="series"
-                    label="Series"
-                    type="series"
-                    id="series"
-                    autoComplete="series"
-                  />
-                  <Button
-                    type="submit"
-                    fullWidth
-                    // variant="contained"
-                    sx={{ mt: 3, mb: 2 }}
-                  >
-                    Save
-                  </Button>
-                </Box>
+                <CategorizeForm
+                  handleSubmit={handleSubmit}
+                  displayValue={"true"}
+                />
                 <Typography variant="h4" color={"#c6cdd7"}>
                   Metadata
                 </Typography>

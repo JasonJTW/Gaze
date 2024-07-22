@@ -59,6 +59,9 @@ function Upload() {
 
   const [categoryFormVisibility, setCategoryFormVisibility] = useState("none");
 
+  const [category, setCategory] = useState<string | null>(null);
+  const [series, setSeries] = useState<string | null>(null);
+
   useEffect(() => {
     if (selectedFiles.length > maxAllowedFiles) return;
     const newPreviews = selectedFiles.map((file) => ({
@@ -88,6 +91,7 @@ function Upload() {
     setSelectedFiles(newSelectedFiles);
   };
 
+  /// Handle Upload Files button
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     /// prevent default submit event
     event.preventDefault();
@@ -115,6 +119,12 @@ function Upload() {
       }
       const result = await response.json();
       alert(result.message);
+      console.log(result.insertIds);
+
+      /// Call variantsAPI to categories images
+      for (const insertId of result.insertIds) {
+        await callVariantsAPI(insertId);
+      }
       window.location.reload();
     } catch (error) {
       const errorMessage = (error as Error).message;
@@ -122,6 +132,58 @@ function Upload() {
       alert("Upload failed: " + errorMessage);
     }
   };
+
+  async function callVariantsAPI(photoID: number) {
+    if (category || series) {
+      try {
+        const response = await fetch(`${hostName}/api/variant/insert`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            category: category,
+            series: series,
+            id: photoID,
+          }),
+        });
+        if (!response.ok) {
+          const errorResponse = await response.json();
+          throw new Error(
+            errorResponse.message || "Failed to fetch variantInsertAPI."
+          );
+        }
+        const result = await response.json();
+        alert(result.message);
+      } catch (error) {
+        const errorMessage = (error as Error).message;
+        console.error("Error inserting data to database: ", errorMessage);
+        alert(
+          "Failed to insert category & serries to database: " + errorMessage
+        );
+      }
+    }
+  }
+
+  async function handleSubmitCategorizeForm(
+    event: React.FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const category = data.get("category");
+    const series = data.get("series");
+    if (typeof category === "string" && typeof series === "string") {
+      setCategory(category);
+      setSeries(series);
+    } else {
+      setCategory(null);
+      setSeries(null);
+    }
+
+    alert(`category: ${category},
+series: ${series}`);
+  }
 
   const theme = createTheme({
     components: {
@@ -179,6 +241,20 @@ function Upload() {
                 <Typography variant="overline" sx={{ color: "#d6c9d0" }}>
                   Select and upload your works.
                 </Typography>
+                <Container
+                  sx={{
+                    minWidth: "100px",
+                    maxWidth: "300px",
+                    margin: 0,
+                    // marginTop: "70px",
+                    display: { categoryFormVisibility },
+                  }}
+                >
+                  <CategorizeForm
+                    handleSubmit={handleSubmitCategorizeForm}
+                    displayValue={categoryFormVisibility}
+                  />
+                </Container>
                 <form
                   action={`${hostName}/api/upload`}
                   method="POST"
@@ -205,24 +281,6 @@ function Upload() {
                     Send
                   </Button>
                 </form>
-                <Container
-                  sx={{
-                    minWidth: "100px",
-                    maxWidth: "300px",
-                    margin: 0,
-                    marginTop: "70px",
-                  }}
-                >
-                  <CategorizeForm
-                    handleSubmit={(event) => {
-                      event.preventDefault();
-                      const data = new FormData(event.currentTarget);
-                      alert(`category: ${data.get("category")},
-          series: ${data.get("series")}`);
-                    }}
-                    displayValue={categoryFormVisibility}
-                  />
-                </Container>
               </Container>
             </Grid>
             <Grid
