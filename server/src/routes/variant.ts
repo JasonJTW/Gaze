@@ -34,15 +34,13 @@ router.get("/", (req: Request, res: Response) => {
 
 //* Insert variantAPI
 router.post("/insert", async (req: Request, res: Response) => {
-  const { category, series, id, url } = req.body;
+  const { category, series, id } = req.body;
   if (!category && !series)
     return res
       .status(400)
       .json({ message: "Please select a category or series" });
 
-  console.log(
-    `category: ${category}, series: ${series}, id: ${id}, url: ${url}`
-  );
+  console.log(`category: ${category}, series: ${series}, id: ${id}`);
   try {
     /// Check if category exists in db
     let query = `SELECT * FROM categories WHERE title = ?`;
@@ -117,13 +115,13 @@ router.get("/get_category", async (req: Request, res: Response) => {
     const query = `SELECT title FROM categories WHERE title != ""`;
 
     const [result] = await db.query(query);
-    console.log(
-      `All categories title: ${util.inspect(result, {
-        showHidden: false,
-        depth: null,
-        colors: true,
-      })}`
-    );
+    // console.log(
+    //   `All categories title: ${util.inspect(result, {
+    //     showHidden: false,
+    //     depth: null,
+    //     colors: true,
+    //   })}`
+    // );
     res.status(200).json({ data: result });
   } catch (err) {
     console.log(`Error getting all categories: ${err}`);
