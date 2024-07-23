@@ -13,7 +13,8 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import ImageIcon from "@mui/icons-material/Image";
 import CategorizeForm from "../components/CategorizeForm";
-
+import { CategoryOptionType } from "../types/CategoryOptionType";
+import { SeriesOptionType } from "../types/SeriesOptionType";
 function Upload() {
   /// Maximum number of uploads
   const maxAllowedFiles = import.meta.env.VITE_maxAllowedFiles;
@@ -59,8 +60,8 @@ function Upload() {
 
   const [categoryFormVisibility, setCategoryFormVisibility] = useState("none");
 
-  const [category, setCategory] = useState<string | null>(null);
-  const [series, setSeries] = useState<string | null>(null);
+  const [category, setCategory] = useState<CategoryOptionType[]>([]);
+  const [series, setSeries] = useState<SeriesOptionType[]>([]);
 
   useEffect(() => {
     if (selectedFiles.length > maxAllowedFiles) return;
@@ -134,28 +135,34 @@ function Upload() {
   };
 
   async function callVariantsAPI(photoID: number) {
-    if (category || series) {
+    if (category.length > 0 || series.length > 0) {
+      const categoryTags = category.length > 0 ? category : [{ title: "" }];
+      const seriesTags = series.length > 0 ? series : [{ title: "" }];
       try {
-        const response = await fetch(`${hostName}/api/variant/insert`, {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            category: category,
-            series: series,
-            id: photoID,
-          }),
-        });
-        if (!response.ok) {
-          const errorResponse = await response.json();
-          throw new Error(
-            errorResponse.message || "Failed to fetch variantInsertAPI."
-          );
+        for (const categoryTag of categoryTags) {
+          for (const seriesTag of seriesTags) {
+            const response = await fetch(`${hostName}/api/variant/insert`, {
+              method: "POST",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                category: categoryTag.title,
+                series: seriesTag.title,
+                id: photoID,
+              }),
+            });
+            if (!response.ok) {
+              const errorResponse = await response.json();
+              throw new Error(
+                errorResponse.message || "Failed to fetch variantInsertAPI."
+              );
+            }
+            // const result = await response.json();
+            // alert(result.message);
+          }
         }
-        const result = await response.json();
-        alert(result.message);
       } catch (error) {
         const errorMessage = (error as Error).message;
         console.error("Error inserting data to database: ", errorMessage);
@@ -170,19 +177,31 @@ function Upload() {
     event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const category = data.get("category");
-    const series = data.get("series");
-    if (typeof category === "string" && typeof series === "string") {
-      setCategory(category);
-      setSeries(series);
-    } else {
-      setCategory(null);
-      setSeries(null);
-    }
+    // if (category.length == 0) {
+    //   setCategory([{ title: "" }]);
+    // }
+    // if (series.length == 0) {
+    //   setSeries([{ title: "" }]);
+    // }
+    if (category.length > 0 || series.length > 0) {
+      const categoryString = category
+        .map((categoryTag) => `#${categoryTag.title}`)
+        .join(", ");
 
-    alert(`category: ${category},
-series: ${series}`);
+      const seriesString = series
+        .map((seriesTag) => `#${seriesTag.title}`)
+        .join(", ");
+      console.log("category: ", categoryString);
+      console.log("series: ", seriesString);
+      alert(
+        "Add tags:\n" +
+          "Category:  " +
+          categoryString +
+          "\n" +
+          "Series:  " +
+          seriesString
+      );
+    }
   }
 
   const theme = createTheme({
@@ -253,6 +272,10 @@ series: ${series}`);
                   <CategorizeForm
                     handleSubmit={handleSubmitCategorizeForm}
                     displayValue={categoryFormVisibility}
+                    category={category}
+                    setCategory={setCategory}
+                    series={series}
+                    setSeries={setSeries}
                   />
                 </Container>
                 <form

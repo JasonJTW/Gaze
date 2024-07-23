@@ -9,25 +9,38 @@ import {
   createTheme,
 } from "@mui/material";
 import { useEffect, useState, Fragment } from "react";
-
+import { CategoryOptionType } from "../types/CategoryOptionType";
+import { SeriesOptionType } from "../types/SeriesOptionType";
 const hostName = import.meta.env.VITE_ServerHostName;
 
 interface CategorizeFormProps {
   handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   displayValue: string;
+  category: CategoryOptionType[];
+  setCategory: React.Dispatch<React.SetStateAction<SeriesOptionType[]>>;
+  series: SeriesOptionType[];
+  setSeries: React.Dispatch<React.SetStateAction<SeriesOptionType[]>>;
 }
 
-function CategorizeForm({ handleSubmit, displayValue }: CategorizeFormProps) {
-  const filter = createFilterOptions<CategoryOptionType>();
-  interface CategoryOptionType {
-    inputValue?: string;
-    title: string;
-  }
+function CategorizeForm({
+  handleSubmit,
+  displayValue,
+  category,
+  setCategory,
+  series,
+  setSeries,
+}: CategorizeFormProps) {
+  const categoryFilter = createFilterOptions<CategoryOptionType>();
 
-  const [category, setCategory] = useState<CategoryOptionType>({ title: "" });
+  const seriesFilter = createFilterOptions<SeriesOptionType>();
+
   const [categorySelections, setCategorySelections] = useState<
     CategoryOptionType[]
   >([]);
+
+  const [seriesSelections, setSeriesSelections] = useState<SeriesOptionType[]>(
+    []
+  );
 
   async function getCategoryTitle() {
     try {
@@ -52,6 +65,7 @@ function CategorizeForm({ handleSubmit, displayValue }: CategorizeFormProps) {
       alert("Failed to call getCategoryAPI: " + errorMessage);
     }
   }
+
   useEffect(() => {
     const fetchCategoryTitles = async () => {
       const titles = await getCategoryTitle();
@@ -60,6 +74,40 @@ function CategorizeForm({ handleSubmit, displayValue }: CategorizeFormProps) {
       }
     };
     fetchCategoryTitles();
+  }, []);
+
+  async function getSeriesTitle() {
+    try {
+      const response = await fetch(`${hostName}/api/variant/get_series`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(
+          errorResponse.message || "Failed to fetch getSeriesAPI."
+        );
+      }
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      console.error("Error fetching getSeriesAPI:", errorMessage);
+      alert("Failed to call getSeriesAPI: " + errorMessage);
+    }
+  }
+
+  useEffect(() => {
+    const fetchSeriesTitles = async () => {
+      const titles = await getSeriesTitle();
+      if (titles) {
+        setSeriesSelections(titles);
+      }
+    };
+    fetchSeriesTitles();
   }, []);
 
   const theme = createTheme({
@@ -190,6 +238,20 @@ function CategorizeForm({ handleSubmit, displayValue }: CategorizeFormProps) {
           },
         },
       },
+      MuiChip: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            backgroundColor: theme.palette.primary.main,
+            color: "#d6c9d0",
+            "& .MuiChip-deleteIcon": {
+              color: "#ffffff", // 删除图标的颜色
+            },
+            "&:hover": {
+              backgroundColor: "#4caf50",
+            },
+          }),
+        },
+      },
     },
   });
 
@@ -203,45 +265,44 @@ function CategorizeForm({ handleSubmit, displayValue }: CategorizeFormProps) {
       >
         {/* //TODO: Implement drop down selection */}
         <Autocomplete
+          size="small"
           freeSolo
+          multiple
           options={categorySelections}
           disableClearable={false}
           forcePopupIcon
           value={category}
           isOptionEqualToValue={(option, value) => option.title === value.title}
           onChange={(event, newValue) => {
-            if (newValue === null) {
-              // 處理清除操作
-              setCategory({ title: "" });
-            } else if (typeof newValue === "string") {
-              setCategory({
-                title: newValue,
-              });
-            } else if (newValue && newValue.inputValue) {
-              // Create a new value from the user input
-              setCategory({
-                title: newValue.inputValue,
-              });
-            } else {
-              setCategory(newValue);
-            }
+            setCategory(
+              typeof newValue === "string"
+                ? [{ title: newValue }]
+                : newValue.map((value) =>
+                    typeof value === "string"
+                      ? { title: value }
+                      : value.inputValue
+                      ? { title: value.inputValue }
+                      : value
+                  )
+            );
           }}
           filterOptions={(options, params) => {
-            const filtered = filter(options, params);
+            const categoryFiltered = categoryFilter(options, params);
 
             const { inputValue } = params;
+
             // Suggest the creation of a new value
             const isExisting = options.some(
               (option) => inputValue === option.title
             );
             if (inputValue !== "" && !isExisting) {
-              filtered.push({
+              categoryFiltered.push({
                 inputValue,
                 title: `Add new "${inputValue}" category`,
               });
             }
 
-            return filtered;
+            return categoryFiltered;
           }}
           getOptionLabel={(option) => {
             // Value selected with enter, right from the input
@@ -311,7 +372,114 @@ function CategorizeForm({ handleSubmit, displayValue }: CategorizeFormProps) {
             />
           )}
         />
-        <TextField
+        <Autocomplete
+          size="small"
+          freeSolo
+          multiple
+          options={seriesSelections}
+          disableClearable={false}
+          forcePopupIcon
+          value={series}
+          isOptionEqualToValue={(option, value) => option.title === value.title}
+          onChange={(event, newValue) => {
+            setSeries(
+              typeof newValue === "string"
+                ? [{ title: newValue }]
+                : newValue.map((value) =>
+                    typeof value === "string"
+                      ? { title: value }
+                      : value.inputValue
+                      ? { title: value.inputValue }
+                      : value
+                  )
+            );
+          }}
+          filterOptions={(options, params) => {
+            const seriesFiltered = seriesFilter(options, params);
+
+            const { inputValue } = params;
+            // Suggest the creation of a new value
+            const isExisting = options.some(
+              (option) => inputValue === option.title
+            );
+            if (inputValue !== "" && !isExisting) {
+              seriesFiltered.push({
+                inputValue,
+                title: `Add new "${inputValue}" category`,
+              });
+            }
+
+            return seriesFiltered;
+          }}
+          getOptionLabel={(option) => {
+            // Value selected with enter, right from the input
+            if (typeof option === "string") {
+              return option;
+            }
+            // Add "xxx" option created dynamically
+            if (option.inputValue) {
+              return option.inputValue;
+            }
+            // Regular option
+            return option.title;
+          }}
+          renderOption={(props, option, { selected }) => {
+            const { key, ...optionProps } = props;
+            return (
+              <ListItem
+                key={key}
+                selected={selected}
+                {...optionProps}
+                sx={{
+                  // color: selected
+                  //   ? "#4caf50 !important"
+                  //   : "#d6c9d0 !important",
+                  // backgroundColor: selected
+                  //   ? "rgba(25, 255, 255, 1)"
+                  //   : "transparent",
+                  "&.Mui-selected": {
+                    color: "#4caf50 !important",
+                    backgroundColor: "rgba(255, 255, 255, 1) !important",
+                  },
+                  "&:hover": {
+                    backgroundColor: "rgba(25, 255, 255, 1) !important",
+                    color: "#ffffff !important",
+                  },
+                }}
+              >
+                {option.title}
+              </ListItem>
+            );
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="normal"
+              fullWidth
+              id="series"
+              label="Series"
+              name="series"
+              type="search"
+              autoFocus
+              /// Hide clearButton
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <Fragment>{params.InputProps.endAdornment}</Fragment>
+                ),
+              }}
+              sx={{
+                '& input[type="search"]::-webkit-search-cancel-button': {
+                  display: "none",
+                },
+                '& input[type="search"]::-ms-clear': {
+                  display: "none",
+                },
+              }}
+            />
+          )}
+        />
+        {/* <TextField
           margin="normal"
           required
           fullWidth
@@ -320,7 +488,7 @@ function CategorizeForm({ handleSubmit, displayValue }: CategorizeFormProps) {
           type="series"
           id="series"
           autoComplete="series"
-        />
+        /> */}
         <Button
           type="submit"
           fullWidth

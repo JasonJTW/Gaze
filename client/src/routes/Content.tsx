@@ -8,6 +8,8 @@ import {
 import { useEffect, useState } from "react";
 import CategorizeForm from "../components/CategorizeForm";
 const hostName = import.meta.env.VITE_ServerHostName;
+import { CategoryOptionType } from "../types/CategoryOptionType";
+import { SeriesOptionType } from "../types/SeriesOptionType";
 
 interface imageDataItem {
   id: number;
@@ -19,6 +21,11 @@ interface imageDataItem {
 }
 
 function Content() {
+  //* State for CategorizeForm component
+  const [category, setCategory] = useState<CategoryOptionType[]>([]);
+
+  const [series, setSeries] = useState<SeriesOptionType[]>([]);
+
   const [imageData, setImageData] = useState<imageDataItem[]>([]);
   const [id, setId] = useState<string | null>(null);
   const getImageData = async (id: string | null) => {
@@ -60,42 +67,42 @@ function Content() {
   }, [id]);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-
+    // const data = new FormData(event.currentTarget);
+    console.log(category);
     /// fetch category form to categoryAPI
-    try {
-      const response = await fetch(`${hostName}/api/variant/insert`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          category: data.get("category"),
-          series: data.get("series"),
-          id: id,
-          url: imageData[0].url,
-        }),
-      });
-      if (!response.ok) {
-        const errorResponse = await response.json();
-        throw new Error(
-          errorResponse.message || "Failed to fetch categoryAPI."
-        );
-      }
-      const result = await response.json();
+    // try {
+    //   const response = await fetch(`${hostName}/api/variant/insert`, {
+    //     method: "POST",
+    //     headers: {
+    //       Accept: "application/json",
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       category: data.get("category"),
+    //       series: data.get("series"),
+    //       id: id,
+    //       url: imageData[0].url,
+    //     }),
+    //   });
+    //   if (!response.ok) {
+    //     const errorResponse = await response.json();
+    //     throw new Error(
+    //       errorResponse.message || "Failed to fetch categoryAPI."
+    //     );
+    //   }
+    //   const result = await response.json();
 
-      alert(
-        result.message +
-          `Category: ${data.get("category")}
-        Series: ${data.get("series")}
-        `
-      );
-    } catch (error) {
-      const errorMessage = (error as Error).message;
-      console.error("Error fetching categoryAPI:", errorMessage);
-      alert("Failed to call categoryAPI: " + errorMessage);
-    }
+    //   alert(
+    //     result.message +
+    //       `Category: ${data.get("category")}
+    //     Series: ${data.get("series")}
+    //     `
+    //   );
+    // } catch (error) {
+    //   const errorMessage = (error as Error).message;
+    //   console.error("Error fetching categoryAPI:", errorMessage);
+    //   alert("Failed to call categoryAPI: " + errorMessage);
+    // }
   };
   const theme = createTheme({
     components: {
@@ -327,6 +334,10 @@ function Content() {
                 <CategorizeForm
                   handleSubmit={handleSubmit}
                   displayValue={"true"}
+                  category={category}
+                  setCategory={setCategory}
+                  series={series}
+                  setSeries={setSeries}
                 />
                 <Typography variant="h4" color={"#c6cdd7"}>
                   Metadata
