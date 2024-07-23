@@ -130,4 +130,25 @@ router.get("/get_category", async (req: Request, res: Response) => {
   }
 });
 
+//* Get all series title
+router.get("/get_series", async (req: Request, res: Response) => {
+  try {
+    const query = `SELECT title FROM series WHERE title != ""`;
+
+    const [result] = await db.query(query);
+    // console.log(
+    //   `All series title: ${util.inspect(result, {
+    //     showHidden: false,
+    //     depth: null,
+    //     colors: true,
+    //   })}`
+    // );
+    res.status(200).json({ data: result });
+  } catch (err) {
+    console.log(`Error getting all series: ${err}`);
+    const errorMessage = (err as Error).message;
+    res.status(400).json({ message: errorMessage });
+  }
+});
+
 export default router;
