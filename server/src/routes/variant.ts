@@ -151,4 +151,47 @@ router.get("/get_series", async (req: Request, res: Response) => {
   }
 });
 
+//* Get photo's categories & series
+router.get("/get_photo_tag", async (req: Request, res: Response) => {
+  const photoId = req.query.id;
+  console.log(`param: ${photoId}`);
+  try {
+    let query = `
+SELECT DISTINCT 
+categories.title AS title
+FROM 
+    variants
+JOIN 
+    categories ON variants.category_id = categories.id
+WHERE 
+    variants.photo_id = ?`;
+
+    const [categoriesResponse] = await db.query(query, [photoId]);
+    // console.log(
+    //   `All categories title: ${util.inspect(categoriesResponse, {
+    //     showHidden: false,
+    //     depth: null,
+    //     colors: true,
+    //   })}`
+    // );
+
+    query = `SELECT DISTINCT 
+series.title AS title
+FROM 
+    variants
+JOIN 
+    series ON variants.category_id = series.id
+WHERE 
+    variants.photo_id = ?`;
+    const [seriesResponse] = await db.query(query, [photoId]);
+    res
+      .status(200)
+      .json({ data: { category: categoriesResponse, series: seriesResponse } });
+  } catch (err) {
+    console.log(`Error getting all categories: ${err}`);
+    const errorMessage = (err as Error).message;
+    res.status(400).json({ message: errorMessage });
+  }
+});
+
 export default router;

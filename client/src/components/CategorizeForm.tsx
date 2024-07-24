@@ -353,7 +353,7 @@ function CategorizeForm({
               label="Category"
               name="category"
               type="search"
-              autoFocus
+              // autoFocus
               /// Hide clearButton
               InputProps={{
                 ...params.InputProps,
@@ -460,7 +460,7 @@ function CategorizeForm({
               label="Series"
               name="series"
               type="search"
-              autoFocus
+              // autoFocus
               /// Hide clearButton
               InputProps={{
                 ...params.InputProps,
