@@ -167,23 +167,30 @@ WHERE
     variants.photo_id = ?`;
 
     const [categoriesResponse] = await db.query(query, [photoId]);
-    // console.log(
-    //   `All categories title: ${util.inspect(categoriesResponse, {
-    //     showHidden: false,
-    //     depth: null,
-    //     colors: true,
-    //   })}`
-    // );
+    console.log(
+      `All categories title: ${util.inspect(categoriesResponse, {
+        showHidden: false,
+        depth: null,
+        colors: true,
+      })}`
+    );
 
     query = `SELECT DISTINCT 
 series.title AS title
 FROM 
     variants
 JOIN 
-    series ON variants.category_id = series.id
+    series ON variants.series_id = series.id
 WHERE 
     variants.photo_id = ?`;
     const [seriesResponse] = await db.query(query, [photoId]);
+    console.log(
+      `All series title: ${util.inspect(seriesResponse, {
+        showHidden: false,
+        depth: null,
+        colors: true,
+      })}`
+    );
     res
       .status(200)
       .json({ data: { category: categoriesResponse, series: seriesResponse } });
