@@ -30,7 +30,7 @@ router.get("/details", async (req: Request, res: Response) => {
   const query = `SELECT * FROM photos where id = ?`;
   try {
     const [data] = await db.query<any[]>(query, [id]);
-    console.log("data:", data);
+    // console.log("data:", data);
 
     /// Handle invalid id
     if (data.length == 0) {

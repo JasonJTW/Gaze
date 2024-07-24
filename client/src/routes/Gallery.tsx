@@ -172,6 +172,12 @@ function Gallery() {
   async function getAllImages() {
     try {
       const response = await fetch(`${hostName}/api/gallery/all`);
+      if (response.status === 429) {
+        // 429 Too Many Requests
+        const errorData = await response.json();
+        alert(`Rate limit exceeded: ${errorData.message}`);
+        return;
+      }
       if (!response.ok) {
         const errorResponse = await response.json();
         throw new Error(errorResponse.message || "Failed to fetch images.");

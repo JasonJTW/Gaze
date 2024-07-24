@@ -68,6 +68,13 @@ export default function Management() {
           Accept: "application/json",
         },
       });
+      if (response.status === 429) {
+        // 429 Too Many Requests
+        const errorData = await response.json();
+        alert(`Rate limit exceeded: ${errorData.message}`);
+        return;
+      }
+
       if (!response.ok) {
         const errorResponse = await response.json();
         throw new Error(errorResponse.message || "Failed to get data.");

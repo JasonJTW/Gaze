@@ -40,6 +40,12 @@ function Content() {
           Accept: "application/json",
         },
       });
+      if (response.status === 429) {
+        // 429 Too Many Requests
+        const errorData = await response.json();
+        alert(`Rate limit exceeded: ${errorData.message}`);
+        return;
+      }
 
       if (!response.ok) {
         const errorResponse = await response.json();
@@ -69,6 +75,12 @@ function Content() {
           },
         }
       );
+      if (response.status === 429) {
+        // 429 Too Many Requests
+        const errorData = await response.json();
+        alert(`Rate limit exceeded: ${errorData.message}`);
+        return;
+      }
       if (!response.ok) {
         const errorResponse = await response.json();
         throw new Error(errorResponse.message || "Failed to get image tags");
@@ -77,8 +89,13 @@ function Content() {
       console.log(result.data);
 
       //* Update image's category and series state
-      const newCategories = result.data.category;
-      const newSeries = result.data.series;
+      const newCategories = result.data.category.filter(
+        (category: CategoryOptionType) => category.title.trim() !== ""
+      );
+      const newSeries = result.data.series.filter(
+        (series: SeriesOptionType) => series.title.trim() !== ""
+      );
+
       setCategory(newCategories);
       setSeries(newSeries);
     } catch (error) {
