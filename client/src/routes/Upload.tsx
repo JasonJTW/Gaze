@@ -126,6 +126,7 @@ function Upload() {
       for (const insertId of result.insertIds) {
         await callVariantsAPI(insertId);
       }
+      alert("Categorize successfully!");
       window.location.reload();
     } catch (error) {
       const errorMessage = (error as Error).message;
@@ -135,41 +136,37 @@ function Upload() {
   };
 
   async function callVariantsAPI(photoID: number) {
-    if (category.length > 0 || series.length > 0) {
-      const categoryTags = category.length > 0 ? category : [{ title: "" }];
-      const seriesTags = series.length > 0 ? series : [{ title: "" }];
-      try {
-        for (const categoryTag of categoryTags) {
-          for (const seriesTag of seriesTags) {
-            const response = await fetch(`${hostName}/api/variant/insert`, {
-              method: "POST",
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                category: categoryTag.title,
-                series: seriesTag.title,
-                id: photoID,
-              }),
-            });
-            if (!response.ok) {
-              const errorResponse = await response.json();
-              throw new Error(
-                errorResponse.message || "Failed to fetch variantInsertAPI."
-              );
-            }
-            // const result = await response.json();
-            // alert(result.message);
-          }
-        }
-      } catch (error) {
-        const errorMessage = (error as Error).message;
-        console.error("Error inserting data to database: ", errorMessage);
-        alert(
-          "Failed to insert category & serries to database: " + errorMessage
+    if (!photoID) return;
+    if (category.length == 0 && series.length == 0) {
+      alert("Please select a category or series");
+      return;
+    }
+
+    const categoryTags = category.length > 0 ? category : [{ title: "" }];
+    const seriesTags = series.length > 0 ? series : [{ title: "" }];
+    try {
+      const response = await fetch(`${hostName}/api/variant/insert`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          categoryArray: categoryTags,
+          seriesArray: seriesTags,
+          id: photoID,
+        }),
+      });
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(
+          errorResponse.message || "Failed to fetch variantInsertAPI."
         );
       }
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      console.error("Error inserting data to database: ", errorMessage);
+      alert("Failed to insert category & serries to database: " + errorMessage);
     }
   }
 

@@ -19,6 +19,8 @@ const db = mysql
   })
   .promise();
 
+import { CategoryOptionType } from "../types/CategoryOptionType";
+import { SeriesOptionType } from "../types/SeriesOptionType";
 router.get("/", (req: Request, res: Response) => {
   res.status(200).json({ message: "This is category api" });
 });
@@ -34,79 +36,151 @@ router.get("/", (req: Request, res: Response) => {
 
 //* Insert variantAPI
 router.post("/insert", async (req: Request, res: Response) => {
-  const { category, series, id } = req.body;
-  if (!category && !series)
+  const { categoryArray, seriesArray, id } = req.body;
+
+  console.log(
+    `category: ${util.inspect(categoryArray, {
+      showHidden: false,
+      depth: null,
+      colors: true,
+    })}, series: ${util.inspect(seriesArray, {
+      showHidden: false,
+      depth: null,
+      colors: true,
+    })}, id: ${util.inspect(id, {
+      showHidden: false,
+      depth: null,
+      colors: true,
+    })}`
+  );
+
+  if (categoryArray.length == 0 && seriesArray.length == 0) {
     return res
       .status(400)
       .json({ message: "Please select a category or series" });
+  }
 
-  console.log(`category: ${category}, series: ${series}, id: ${id}`);
+  let categoryTitles: string[] = [];
+  categoryArray.forEach((category: CategoryOptionType) => {
+    categoryTitles.push(category.title);
+  });
+  let seriesTitles: string[] = [];
+  seriesArray.forEach((series: SeriesOptionType) => {
+    seriesTitles.push(series.title);
+  });
+  console.log("categoryTitles: ", categoryTitles);
+  console.log("seriesTitles: ", seriesTitles);
+
   try {
-    /// Check if category exists in db
-    let query = `SELECT * FROM categories WHERE title = ?`;
-    const [categoryRows] = await db.query<RowDataPacket[]>(query, [category]);
-    const categoryExists = categoryRows.length > 0 ? categoryRows[0] : null;
-    let categoryID = null;
-    if (categoryExists) {
-      categoryID = categoryExists.id;
-    }
-    // console.log(
-    //   `categoryExists: ${util.inspect(categoryExists, {
-    //     showHidden: false,
-    //     depth: null,
-    //     colors: true,
-    //   })}, categoryID: ${categoryID}`
-    // );
+    //* Clean up variants with deleted tags in db
 
-    /// If category not exists, add category into db
-    if (!categoryExists || categoryExists.length === 0) {
-      /// Create new category
-      query = `INSERT INTO categories (title) VALUES (?)`;
-      const [categoryResult] = await db.query<ResultSetHeader>(query, [
-        category,
-      ]);
-      // console.log(
-      //   `Created category result: ${util.inspect(categoryResult, {
-      //     showHidden: false,
-      //     depth: null,
-      //   })}`
-      // );
-      categoryID = categoryResult.insertId;
-      console.log(`New category successfully added as id: ${categoryID}`);
+    if (categoryTitles.length > 0) {
+      const categoryPlaceholders = categoryTitles.map(() => "?").join(", ");
+      let query = `DELETE FROM variants WHERE photo_id = ? AND category_id IN (SELECT id FROM categories WHERE title NOT IN (${categoryPlaceholders}))`;
+      await db.query(query, [id, ...categoryTitles]);
     }
 
-    /// Check if series exists in db
-    query = `SELECT * FROM series WHERE title = ?`;
-    const [seriesRows] = await db.query<RowDataPacket[]>(query, [series]);
-    const seriesExists = seriesRows.length > 0 ? seriesRows[0] : null;
-    let seriesID = null;
-    if (seriesExists) {
-      seriesID = seriesExists.id;
+    if (seriesTitles.length > 0) {
+      const seriesPlaceholders = seriesTitles.map(() => "?").join(", ");
+      let query = `DELETE FROM variants WHERE photo_id = ? AND series_id IN (SELECT id FROM series WHERE title NOT IN (${seriesPlaceholders}))`;
+      await db.query(query, [id, ...seriesTitles]);
     }
+    for (const categoryTag of categoryArray) {
+      for (const seriesTag of seriesArray) {
+        const category = categoryTag.title;
+        const series = seriesTag.title;
+        /// Check if category exists in db
+        let query = `SELECT * FROM categories WHERE title = ?`;
+        const [categoryRows] = await db.query<RowDataPacket[]>(query, [
+          category,
+        ]);
+        const categoryExists = categoryRows.length > 0 ? categoryRows[0] : null;
+        let categoryID = null;
+        if (categoryExists) {
+          categoryID = categoryExists.id;
+        }
+        // console.log(
+        //   `categoryExists: ${util.inspect(categoryExists, {
+        //     showHidden: false,
+        //     depth: null,
+        //     colors: true,
+        //   })}, categoryID: ${categoryID}`
+        // );
 
-    /// If series not exists, add series into db
-    if (!seriesExists || seriesExists.length === 0) {
-      /// Create new series
-      query = `INSERT INTO series (title) VALUES (?)`;
-      const [seriesResult] = await db.query<ResultSetHeader>(query, [series]);
-      // console.log(
-      //   `Created series result: ${util.inspect(seriesResult, {
-      //     showHidden: false,
-      //     depth: null,
-      //     colors: true,
-      //   })}`
-      // );
-      seriesID = seriesResult.insertId;
-      console.log(`New series successfully added as id: ${seriesID}`);
+        /// If category not exists, add category into db
+        if (!categoryExists || categoryExists.length === 0) {
+          /// Create new category
+          query = `INSERT INTO categories (title) VALUES (?)`;
+          const [categoryResult] = await db.query<ResultSetHeader>(query, [
+            category,
+          ]);
+          // console.log(
+          //   `Created category result: ${util.inspect(categoryResult, {
+          //     showHidden: false,
+          //     depth: null,
+          //   })}`
+          // );
+          categoryID = categoryResult.insertId;
+          console.log(`New category successfully added as id: ${categoryID}`);
+        }
+
+        /// Check if series exists in db
+        query = `SELECT * FROM series WHERE title = ?`;
+        const [seriesRows] = await db.query<RowDataPacket[]>(query, [series]);
+        const seriesExists = seriesRows.length > 0 ? seriesRows[0] : null;
+        let seriesID = null;
+        if (seriesExists) {
+          seriesID = seriesExists.id;
+        }
+
+        /// If series not exists, add series into db
+        if (!seriesExists || seriesExists.length === 0) {
+          /// Create new series
+          query = `INSERT INTO series (title) VALUES (?)`;
+          const [seriesResult] = await db.query<ResultSetHeader>(query, [
+            series,
+          ]);
+          // console.log(
+          //   `Created series result: ${util.inspect(seriesResult, {
+          //     showHidden: false,
+          //     depth: null,
+          //     colors: true,
+          //   })}`
+          // );
+          seriesID = seriesResult.insertId;
+          console.log(`New series successfully added as id: ${seriesID}`);
+        }
+
+        /// Check if variants exist in db
+        query = `SELECT * FROM variants WHERE photo_id = ? AND category_id = ?  AND series_id = ?`;
+        const [variantsCheck] = await db.query<RowDataPacket[]>(query, [
+          id,
+          categoryID,
+          seriesID,
+        ]);
+        const variantExists =
+          variantsCheck.length > 0 ? variantsCheck[0] : false;
+        if (variantExists) {
+          console.log(
+            `variants found: ${util.inspect(variantExists, {
+              showHidden: false,
+              depth: null,
+              colors: true,
+            })}`
+          );
+
+          continue;
+        }
+
+        /// Create new variants in db
+        query = `INSERT INTO variants(photo_id, category_id, series_id) VALUES(?, ?, ?)`;
+        await db.query(query, [id, categoryID, seriesID]);
+      }
     }
-
-    /// Create new variants in db
-    query = `INSERT INTO variants(photo_id, category_id, series_id) VALUES(?, ?, ?)`;
-    await db.query(query, [id, categoryID, seriesID]);
+    res.status(200).json({ message: "Success!" });
   } catch (err) {
     console.log(`Error creating variants for photo?id=${id}: `, err);
   }
-  res.status(200).json({ message: "Success!" });
 });
 
 //* Get all categories title
