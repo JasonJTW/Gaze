@@ -28,6 +28,7 @@ function Content() {
 
   const [imageData, setImageData] = useState<imageDataItem[]>([]);
   const [id, setId] = useState<string | null>(null);
+
   const getImageData = async (id: string | null) => {
     if (!id) {
       return;
@@ -54,6 +55,39 @@ function Content() {
     }
   };
 
+  async function getImageTags(photoId: string | null) {
+    if (!photoId) {
+      return;
+    }
+    try {
+      const response = await fetch(
+        `${hostName}/api/variant/get_photo_tag?id=${photoId}`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(errorResponse.message || "Failed to get image tags");
+      }
+      const result = await response.json();
+      console.log(result.data);
+
+      //* Update image's category and series state
+      const newCategories = result.data.category;
+      const newSeries = result.data.series;
+      setCategory(newCategories);
+      setSeries(newSeries);
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      console.error("Error fetching image tags:", errorMessage);
+      alert("Failed to get image tags: " + errorMessage);
+    }
+  }
+
   //* Get image's id from url
   useEffect(() => {
     const param = new URLSearchParams(window.location.search);
@@ -64,7 +98,11 @@ function Content() {
   //* Fetch data from api
   useEffect(() => {
     getImageData(id);
+
+    //* Fetch get_photo's_tags api
+    getImageTags(id);
   }, [id]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // const data = new FormData(event.currentTarget);
