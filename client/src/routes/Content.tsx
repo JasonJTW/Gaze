@@ -120,45 +120,49 @@ function Content() {
     getImageTags(id);
   }, [id]);
 
+  async function callVariantsAPI(photoID: string | null) {
+    if (!photoID) return;
+    if (category.length == 0 && series.length == 0) {
+      alert("Please select a category or series");
+      return;
+    }
+
+    const categoryTags = category.length > 0 ? category : [{ title: "" }];
+    const seriesTags = series.length > 0 ? series : [{ title: "" }];
+    try {
+      const response = await fetch(`${hostName}/api/variant/insert`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          categoryArray: categoryTags,
+          seriesArray: seriesTags,
+          id: photoID,
+        }),
+      });
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(
+          errorResponse.message || "Failed to fetch variantInsertAPI."
+        );
+      }
+
+      alert("Categorize successfully!");
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      console.error("Error inserting data to database: ", errorMessage);
+      alert("Failed to insert category & serries to database: " + errorMessage);
+    }
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // const data = new FormData(event.currentTarget);
     console.log(category);
-    /// fetch category form to categoryAPI
-    // try {
-    //   const response = await fetch(`${hostName}/api/variant/insert`, {
-    //     method: "POST",
-    //     headers: {
-    //       Accept: "application/json",
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       category: data.get("category"),
-    //       series: data.get("series"),
-    //       id: id,
-    //       url: imageData[0].url,
-    //     }),
-    //   });
-    //   if (!response.ok) {
-    //     const errorResponse = await response.json();
-    //     throw new Error(
-    //       errorResponse.message || "Failed to fetch categoryAPI."
-    //     );
-    //   }
-    //   const result = await response.json();
-
-    //   alert(
-    //     result.message +
-    //       `Category: ${data.get("category")}
-    //     Series: ${data.get("series")}
-    //     `
-    //   );
-    // } catch (error) {
-    //   const errorMessage = (error as Error).message;
-    //   console.error("Error fetching categoryAPI:", errorMessage);
-    //   alert("Failed to call categoryAPI: " + errorMessage);
-    // }
+    callVariantsAPI(id);
   };
+
   const theme = createTheme({
     components: {
       MuiContainer: {
