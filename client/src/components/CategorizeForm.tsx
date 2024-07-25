@@ -7,7 +7,10 @@ import {
   createFilterOptions,
   ThemeProvider,
   createTheme,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
 import { useEffect, useState, Fragment } from "react";
 import { CategoryOptionType } from "../types/CategoryOptionType";
 import { SeriesOptionType } from "../types/SeriesOptionType";
@@ -20,6 +23,8 @@ interface CategorizeFormProps {
   setCategory: React.Dispatch<React.SetStateAction<SeriesOptionType[]>>;
   series: SeriesOptionType[];
   setSeries: React.Dispatch<React.SetStateAction<SeriesOptionType[]>>;
+  photographer: string | null;
+  setPhotographer: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 function CategorizeForm({
@@ -29,6 +34,8 @@ function CategorizeForm({
   setCategory,
   series,
   setSeries,
+  photographer,
+  setPhotographer,
 }: CategorizeFormProps) {
   const categoryFilter = createFilterOptions<CategoryOptionType>();
 
@@ -41,6 +48,10 @@ function CategorizeForm({
   const [seriesSelections, setSeriesSelections] = useState<SeriesOptionType[]>(
     []
   );
+
+  const handlePhotographerClear = () => {
+    setPhotographer("");
+  };
 
   async function getCategoryTitle() {
     try {
@@ -141,6 +152,7 @@ function CategorizeForm({
       MuiTextField: {
         styleOverrides: {
           root: {
+            marginBottom: "10px",
             "& .MuiInputBase-input": {
               color: "#d6c9d0", // Text color
             },
@@ -170,14 +182,14 @@ function CategorizeForm({
               WebkitBoxShadow: "0 0 0 100px #010c1e inset",
               WebkitTextFillColor: "#d6c9d0",
             },
-            // "& .MuiInputBase-root": {
-            //   "& .MuiInputAdornment-root .MuiIconButton-root": {
-            //     color: "#d6c9d0", // Clear icon color
-            //     "&:hover": {
-            //       color: "#4caf50", // Clear icon hover color
-            //     },
-            //   },
-            // },
+            "& .MuiInputBase-root": {
+              "& .MuiInputAdornment-root .MuiIconButton-root": {
+                color: "#d6c9d0", // Clear icon color
+                "&:hover": {
+                  color: "#4caf50", // Clear icon hover color
+                },
+              },
+            },
           },
         },
       },
@@ -263,7 +275,28 @@ function CategorizeForm({
         // noValidate
         sx={{ mt: 1, mb: 4, display: displayValue }}
       >
-        {/* //TODO: Implement drop down selection */}
+        <TextField
+          id="photographer"
+          value={photographer}
+          onChange={(e) => setPhotographer(e.target.value)}
+          label="Photographer"
+          name="photographer"
+          variant="outlined"
+          size="small"
+          type="name"
+          fullWidth
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                {photographer && (
+                  <IconButton onClick={handlePhotographerClear}>
+                    <ClearIcon />
+                  </IconButton>
+                )}
+              </InputAdornment>
+            ),
+          }}
+        />
         <Autocomplete
           size="small"
           freeSolo

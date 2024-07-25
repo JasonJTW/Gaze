@@ -44,4 +44,21 @@ router.get("/details", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/edit", async (req: Request, res: Response) => {
+  const id = req.query.id;
+  const photographer = req.body.photographer;
+  if (!id) {
+    return res.status(400).json({ message: "Missing required parameter 'id'" });
+  }
+
+  const query = `UPDATE photos SET photographer = ? Where id = ?`;
+  try {
+    await db.query(query, [photographer, id]);
+    res.status(200).json({ message: "Data edited successfully!" });
+  } catch (err) {
+    console.log("Error editing data in db: ", err);
+    res.status(500).json({ message: "Failed to edit data." });
+  }
+});
+
 export default router;

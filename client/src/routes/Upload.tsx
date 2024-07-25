@@ -62,6 +62,7 @@ function Upload() {
 
   const [category, setCategory] = useState<CategoryOptionType[]>([]);
   const [series, setSeries] = useState<SeriesOptionType[]>([]);
+  const [photographer, setPhotographer] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedFiles.length > maxAllowedFiles) return;
@@ -101,6 +102,12 @@ function Upload() {
     selectedFiles.forEach((file) => {
       formData.append("image", file);
     });
+
+    /// Add the photographer to the FormData
+    if (photographer) {
+      formData.append("photographer", photographer);
+    }
+
     console.log(formData);
 
     try {
@@ -174,13 +181,8 @@ function Upload() {
     event: React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
-    // if (category.length == 0) {
-    //   setCategory([{ title: "" }]);
-    // }
-    // if (series.length == 0) {
-    //   setSeries([{ title: "" }]);
-    // }
-    if (category.length > 0 || series.length > 0) {
+
+    if (category.length > 0 || series.length > 0 || photographer) {
       const categoryString = category
         .map((categoryTag) => `#${categoryTag.title}`)
         .join(", ");
@@ -191,7 +193,10 @@ function Upload() {
       console.log("category: ", categoryString);
       console.log("series: ", seriesString);
       alert(
-        "Add tags:\n" +
+        "-----Add tags-----\n" +
+          "Photographer:  " +
+          photographer +
+          "\n" +
           "Category:  " +
           categoryString +
           "\n" +
@@ -262,8 +267,8 @@ function Upload() {
                     minWidth: "100px",
                     maxWidth: "300px",
                     margin: 0,
-                    // marginTop: "70px",
-                    display: { categoryFormVisibility },
+                    marginTop: "50px",
+                    display: categoryFormVisibility,
                   }}
                 >
                   <CategorizeForm
@@ -273,6 +278,8 @@ function Upload() {
                     setCategory={setCategory}
                     series={series}
                     setSeries={setSeries}
+                    photographer={photographer}
+                    setPhotographer={setPhotographer}
                   />
                 </Container>
                 <form
@@ -322,7 +329,7 @@ function Upload() {
                     />
                     <ImageListItemBar
                       title={preview.name}
-                      subtitle={<span>by_ Jyun Hao, Jhang</span>}
+                      subtitle={photographer && <span>by_ {photographer}</span>}
                       position="below"
                       sx={{
                         color: "#d6c9d0",
