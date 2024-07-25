@@ -119,6 +119,7 @@ router.post(
         req.files as { [fieldname: string]: Express.Multer.File[] }
       ).image;
       console.log(req.files.image);
+      console.log("photographer: ", req.body.photographer);
       console.log(`bucketRegion: ${bucketRegion}`);
 
       try {
@@ -161,7 +162,11 @@ router.post(
           metadata.XDimension = dimensionWidth;
           metadata.YDimension = dimensionHeight;
 
-          const photographer = metadata.Artist || metadata.Copyright || null;
+          const photographer =
+            req.body.photographer ||
+            metadata.Artist ||
+            metadata.Copyright ||
+            null;
           console.log(image);
           console.log("metadata:", metadata);
           /// random file name

@@ -28,7 +28,7 @@ function Content() {
 
   const [imageData, setImageData] = useState<imageDataItem[]>([]);
   const [id, setId] = useState<string | null>(null);
-
+  const [photographer, setPhotographer] = useState<string | null>(null);
   const getImageData = async (id: string | null) => {
     if (!id) {
       return;
@@ -54,6 +54,7 @@ function Content() {
       const result = await response.json();
       console.log(result.data);
       setImageData(result.data);
+      setPhotographer(result.data[0].photographer);
     } catch (error) {
       const errorMessage = (error as Error).message;
       console.error("Error fetching imageData:", errorMessage);
@@ -157,10 +158,35 @@ function Content() {
     }
   }
 
+  async function editPhotographer() {
+    try {
+      const response = await fetch(`${hostName}/api/photo/edit?id=${id}`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          photographer: photographer,
+        }),
+      });
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(errorResponse.message || "Failed to fetch edit API.");
+      }
+      alert("Update data successfully!");
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      console.error("Error update data to database: ", errorMessage);
+      alert("Failed to update data to database: " + errorMessage);
+    }
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log(category);
     callVariantsAPI(id);
+    editPhotographer();
   };
 
   const theme = createTheme({
@@ -389,7 +415,7 @@ function Content() {
                 <Typography variant="h4" color={"#c6cdd7"}>
                   Information
                 </Typography>
-                <hr />
+                <hr style={{ marginBottom: "20px" }} />
                 <CategorizeForm
                   handleSubmit={handleSubmit}
                   displayValue={"true"}
@@ -397,6 +423,8 @@ function Content() {
                   setCategory={setCategory}
                   series={series}
                   setSeries={setSeries}
+                  photographer={photographer}
+                  setPhotographer={setPhotographer}
                 />
                 <Typography variant="h4" color={"#c6cdd7"}>
                   Metadata
