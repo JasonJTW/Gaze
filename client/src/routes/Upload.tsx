@@ -257,7 +257,7 @@ function Upload() {
             >
               <Container>
                 <Typography variant="h1" sx={{ color: "#c6cdd7" }}>
-                  Upload
+                  Upload"
                 </Typography>
                 <Typography variant="overline" sx={{ color: "#d6c9d0" }}>
                   Select and upload your works.

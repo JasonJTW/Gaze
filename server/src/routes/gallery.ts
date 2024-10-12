@@ -29,7 +29,15 @@ router.get("/all", async (req: Request, res: Response) => {
     // TODO: Implement check visibility=public in query
 
     //* Select all images' photo_id in variants and join with photos
-    const query = `SELECT * FROM variants JOIN photos ON variants.photo_id = photos.id `;
+    const query = `SELECT v.id, v.photo_id, v.category_id, v.series_id, p.*
+FROM (
+    SELECT id, photo_id, category_id, series_id,
+           ROW_NUMBER() OVER (PARTITION BY photo_id ORDER BY id) AS row_num
+    FROM variants
+) AS v
+JOIN photos p ON v.photo_id = p.id
+WHERE v.row_num = 1;
+ `;
     const [row] = await db.query(query);
     console.log(
       `Query result: ${util.inspect(row, {

@@ -306,7 +306,7 @@ function CategorizeForm({
           forcePopupIcon
           value={category}
           isOptionEqualToValue={(option, value) => option.title === value.title}
-          onChange={(event, newValue) => {
+          onChange={(_event, newValue) => {
             setCategory(
               typeof newValue === "string"
                 ? [{ title: newValue }]
@@ -414,7 +414,7 @@ function CategorizeForm({
           forcePopupIcon
           value={series}
           isOptionEqualToValue={(option, value) => option.title === value.title}
-          onChange={(event, newValue) => {
+          onChange={(_event, newValue) => {
             setSeries(
               typeof newValue === "string"
                 ? [{ title: newValue }]
