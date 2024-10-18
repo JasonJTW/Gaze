@@ -82,10 +82,14 @@ router.post("/signin", async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid password" });
     }
 
+    /// Password is correct
     //* Create JWT
     delete user.password;
+    console.log(`user_password_after_delete: ${user.password}`);
     const token = jwt.sign(user, jwtSecretAccessToken, { expiresIn: "1h" });
     const decode = jwt.decode(token) as { exp?: number };
+    const verify = jwt.verify(token, jwtSecretAccessToken);
+    console.log("verify: ", verify);
     console.log("decode: ", decode);
     if (decode && decode.exp) {
       const expiryDate = new Date(decode.exp * 1000).toLocaleString(); // 將 UNIX 時間戳轉換為日期

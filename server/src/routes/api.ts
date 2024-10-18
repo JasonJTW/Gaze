@@ -7,6 +7,7 @@ import getPhotoAPI from "./getPhoto";
 import authAPI from "./auth";
 import variantAPI from "./variant";
 import galleryAPI from "./gallery";
+import privateAPI from "./private";
 router.get("/", (req: Request, res: Response) => {
   res.send("this is the api route");
 });
@@ -16,5 +17,6 @@ router.use("/photo", getPhotoAPI);
 router.use("/user", authAPI);
 router.use("/variant", variantAPI);
 router.use("/gallery", galleryAPI);
+router.use("/private", privateAPI);
 
 export default router;
