@@ -45,6 +45,9 @@ const theme = createTheme({
           "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
             borderColor: "#d6c9d0", // Outline border color
           },
+          "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#1565c0", // Outline border color on-hover
+          },
           "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
             {
               borderColor: "#4caf50", // Outline border color when focused
@@ -97,6 +100,8 @@ export default function SignIn() {
       `email: ${data.get("email")}
       password: ${data.get("password")}`
     );
+
+    //TODO: Implement Sign in function
   };
 
   return (
