@@ -72,6 +72,7 @@ router.post("/signin", async (req: Request, res: Response) => {
     console.log("user:", user);
 
     if (!user) {
+      console.log(`Invalid email`);
       return res.status(401).json({ message: "Invalid email" });
     }
 
@@ -79,6 +80,7 @@ router.post("/signin", async (req: Request, res: Response) => {
     const match = await bcrypt.compare(password, user.password);
     console.log("match: ", match);
     if (!match) {
+      console.log(`Invalid password`);
       return res.status(401).json({ message: "Invalid password" });
     }
 
