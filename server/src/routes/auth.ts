@@ -4,6 +4,7 @@ import { registerValidation, loginValidation } from "../validation";
 import mysql, { RowDataPacket } from "mysql2";
 import jwt from "jsonwebtoken";
 import { number } from "joi";
+import cookieParser from "cookie-parser";
 
 const jwtSecretAccessToken = process.env.JWT_ACCESS_TOKEN_SECRET as string;
 
@@ -22,7 +23,7 @@ const db = mysql
   .promise();
 
 const router = express.Router();
-
+router.use(cookieParser());
 //* Register API
 router.post("/register", async (req: Request, res: Response) => {
   //* Validate the registration
@@ -99,6 +100,13 @@ router.post("/signin", async (req: Request, res: Response) => {
     } else {
       console.log("Token has no expiry or is invalid");
     }
+
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
 
     res
       .status(200)

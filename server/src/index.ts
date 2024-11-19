@@ -9,6 +9,7 @@ import { rateLimit } from "express-rate-limit";
 app.use(
   cors({
     origin: clientHostName, // Allow requests from this ip
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"], // 允許的 HTTP 方法
     allowedHeaders: ["Content-Type", "Authorization"], // 允許的 HTTP 標頭
   })
