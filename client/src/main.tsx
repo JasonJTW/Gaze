@@ -21,6 +21,7 @@ import SignIn from "./routes/Signin.tsx";
 import Category from "./routes/Category.tsx";
 import Gallery from "./routes/Gallery.tsx";
 import Personal from "./routes/Personal.tsx";
+import SignUp from "./routes/Signup.tsx";
 
 const theme = createTheme({
   palette: {
@@ -77,6 +78,7 @@ const router = createBrowserRouter([
         path: "/signin",
         element: <SignIn />,
       },
+      { path: "/signup", element: <SignUp /> },
       { path: "/category", element: <Category /> },
       { path: "/gallery", element: <Gallery /> },
       { path: "/personal", element: <Personal /> },

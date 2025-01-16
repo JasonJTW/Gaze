@@ -12,7 +12,14 @@ import { Link as RouterLink } from "react-router-dom";
 
 import MenuIcon from "@mui/icons-material/Menu";
 
-const pages = ["Upload", "Management", "Gallery", "Category"];
+const pages = [
+  "Signin",
+  "Signup",
+  "Upload",
+  "Management",
+  "Gallery",
+  "Category",
+];
 
 interface Props {
   /**
